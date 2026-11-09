@@ -5,6 +5,7 @@
 const STORAGE_KEY = 'demirdiary.v1';
 const DEFAULT_CYCLE_LENGTH = 28;
 const DEFAULT_PERIOD_LENGTH = 5;
+const LUTEAL_PHASE = 14; // ägglossningen sker ungefär 14 dagar före nästa mens
 const PREDICTED_CYCLES = 3; // hur många kommande menstillfällen som visas i kalendern
 
 const MARKS = [
@@ -63,6 +64,10 @@ function sanitizeEntry(raw) {
   const sleep = Number(raw.sleep);
   if (raw.sleep !== null && raw.sleep !== '' && raw.sleep !== undefined && Number.isFinite(sleep) && sleep >= 0 && sleep <= 24) {
     entry.sleep = sleep;
+  }
+  const wakeups = Number(raw.wakeups);
+  if (raw.wakeups !== null && raw.wakeups !== '' && raw.wakeups !== undefined && Number.isInteger(wakeups) && wakeups >= 0 && wakeups <= 50) {
+    entry.wakeups = wakeups;
   }
   if (typeof raw.note === 'string' && raw.note.trim()) entry.note = raw.note.slice(0, 2000);
   return Object.keys(entry).length ? entry : null;
@@ -138,7 +143,9 @@ function computeCycle() {
   const periodLen = avgPeriod ?? DEFAULT_PERIOD_LENGTH;
 
   let nextStart = null;
+  let nextOvulation = null;
   const predicted = new Set();
+  const predictedOvulation = new Set();
   if (lastStart !== null) {
     nextStart = lastStart + cycleLen;
     for (let c = 0; c < PREDICTED_CYCLES; c++) {
@@ -147,6 +154,14 @@ function computeCycle() {
         const key = dayNumToKey(d);
         if (d >= today && !isPeriod(entries[key])) predicted.add(key);
       }
+
+      // Ägglossning ungefär 14 dagar före varje uppskattad mens. Hoppa över cykeln
+      // om du redan har markerat ägglossning nära den dagen.
+      const ov = start - LUTEAL_PHASE;
+      if (ov < today || hasOvulationNear(ov)) continue;
+      if (nextOvulation === null) nextOvulation = ov;
+      const ovKey = dayNumToKey(ov);
+      if (!entries[ovKey]?.mark) predictedOvulation.add(ovKey);
     }
   }
 
@@ -155,10 +170,26 @@ function computeCycle() {
     avgCycle,
     avgPeriod,
     nextStart,
+    nextOvulation,
     cycleDay: lastStart !== null && lastStart <= today ? today - lastStart + 1 : null,
     usingDefault: avgCycle === null,
     predicted,
+    predictedOvulation,
   };
+}
+
+function hasOvulationNear(dayNum, range = 5) {
+  for (let d = dayNum - range; d <= dayNum + range; d++) {
+    if (entries[dayNumToKey(d)]?.mark === 'ovulation') return true;
+  }
+  return false;
+}
+
+function relativeDays(diff) {
+  if (diff > 1) return `om ${diff} dagar`;
+  if (diff === 1) return 'imorgon';
+  if (diff === 0) return 'idag';
+  return `${-diff} ${-diff === 1 ? 'dag' : 'dagar'} sen`;
 }
 
 /* ---------- Översikt ---------- */
@@ -170,22 +201,23 @@ function renderStats(cycle) {
   $('stat-avg-cycle').textContent = cycle.avgCycle ? `${cycle.avgCycle} dagar` : '–';
   $('stat-avg-period').textContent = cycle.avgPeriod ? `${cycle.avgPeriod} dagar` : '–';
 
-  const next = $('stat-next');
-  const sub = $('stat-next-sub');
+  const assumption = cycle.usingDefault ? ' (antar 28 dagars cykel)' : '';
   if (cycle.nextStart === null) {
-    next.textContent = '–';
-    sub.textContent = 'Registrera din mens för att få en uppskattning';
+    for (const id of ['stat-next', 'stat-ovulation']) $(id).textContent = '–';
+    $('stat-next-sub').textContent = 'Registrera din mens för att få en uppskattning';
+    $('stat-ovulation-sub').textContent = '';
     return;
   }
-  next.textContent = formatDayNum(cycle.nextStart);
-  const diff = cycle.nextStart - cycle.today;
-  let text;
-  if (diff > 1) text = `om ${diff} dagar`;
-  else if (diff === 1) text = 'imorgon';
-  else if (diff === 0) text = 'idag';
-  else text = `${-diff} ${-diff === 1 ? 'dag' : 'dagar'} sen`;
-  if (cycle.usingDefault) text += ' (antar 28 dagars cykel)';
-  sub.textContent = text;
+  $('stat-next').textContent = formatDayNum(cycle.nextStart);
+  $('stat-next-sub').textContent = relativeDays(cycle.nextStart - cycle.today) + assumption;
+
+  if (cycle.nextOvulation === null) {
+    $('stat-ovulation').textContent = '–';
+    $('stat-ovulation-sub').textContent = '';
+  } else {
+    $('stat-ovulation').textContent = formatDayNum(cycle.nextOvulation);
+    $('stat-ovulation-sub').textContent = relativeDays(cycle.nextOvulation - cycle.today) + assumption;
+  }
 }
 
 /* ---------- Kalender ---------- */
@@ -221,6 +253,7 @@ function renderCalendar(cycle) {
 
     if (entry?.mark) btn.classList.add(`mark-${entry.mark}`);
     if (cycle.predicted.has(key)) btn.classList.add('predicted');
+    if (cycle.predictedOvulation.has(key)) btn.classList.add('predicted-ovulation');
     if (key === tKey) btn.classList.add('today');
     if (key > tKey) btn.classList.add('future');
 
@@ -238,18 +271,19 @@ function renderCalendar(cycle) {
       btn.append(dot);
     }
 
-    btn.setAttribute('aria-label', describeDay(key, entry, cycle.predicted.has(key)));
+    btn.setAttribute('aria-label', describeDay(key, entry, cycle.predicted.has(key), cycle.predictedOvulation.has(key)));
     btn.addEventListener('click', () => openDay(key));
     container.append(btn);
   }
 }
 
-function describeDay(key, entry, predicted) {
+function describeDay(key, entry, predicted, predictedOvulation) {
   const parts = [formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' })];
   if (entry?.mark) parts.push(MARKS.find((m) => m.value === entry.mark).label.toLowerCase());
   if (entry?.mood) parts.push(`humör: ${MOODS.find((m) => m.value === entry.mood).label.toLowerCase()}`);
   if (entry?.note) parts.push('har anteckning');
   if (predicted) parts.push('uppskattad mens');
+  if (predictedOvulation) parts.push('uppskattad ägglossning');
   return parts.join(', ');
 }
 
@@ -297,6 +331,7 @@ function openDay(key) {
   if (entry.mood) form.querySelector(`input[name="mood"][value="${entry.mood}"]`).checked = true;
   if (entry.energy) form.querySelector(`input[name="energy"][value="${entry.energy}"]`).checked = true;
   $('sleep').value = entry.sleep ?? '';
+  $('wakeups').value = entry.wakeups ?? '';
   $('note').value = entry.note || '';
 
   dialog.showModal();
@@ -325,6 +360,7 @@ form.addEventListener('submit', (e) => {
     mood: data.get('mood'),
     energy: data.get('energy'),
     sleep: $('sleep').value,
+    wakeups: $('wakeups').value,
     note: $('note').value,
   });
   if (entry) entries[currentKey] = entry;
