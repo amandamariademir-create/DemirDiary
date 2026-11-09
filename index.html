@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#c0304e">
+  <title>DemirDiary</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>🌸 DemirDiary</h1>
+    <p class="subtitle">Min hälsodagbok</p>
+  </header>
+
+  <main>
+    <section class="stats" aria-label="Översikt över cykeln">
+      <div class="stat">
+        <span class="stat-label">Cykeldag</span>
+        <span class="stat-value" id="stat-cycle-day">–</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Nästa mens</span>
+        <span class="stat-value" id="stat-next">–</span>
+        <span class="stat-sub" id="stat-next-sub"></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Snittcykel</span>
+        <span class="stat-value" id="stat-avg-cycle">–</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Snittmens</span>
+        <span class="stat-value" id="stat-avg-period">–</span>
+      </div>
+    </section>
+
+    <section class="calendar" aria-label="Kalender">
+      <div class="calendar-nav">
+        <button type="button" class="icon-btn" id="prev-month" aria-label="Föregående månad">‹</button>
+        <h2 id="month-title"></h2>
+        <button type="button" class="icon-btn" id="next-month" aria-label="Nästa månad">›</button>
+      </div>
+      <button type="button" class="link-btn" id="go-today">Gå till idag</button>
+
+      <div class="weekdays" aria-hidden="true">
+        <span>Mån</span><span>Tis</span><span>Ons</span><span>Tor</span><span>Fre</span><span>Lör</span><span>Sön</span>
+      </div>
+      <div class="days" id="days"></div>
+
+      <ul class="legend">
+        <li><span class="swatch flow-spotting"></span>Stänk</li>
+        <li><span class="swatch flow-light"></span>Lätt</li>
+        <li><span class="swatch flow-medium"></span>Medel</li>
+        <li><span class="swatch flow-heavy"></span>Kraftig</li>
+        <li><span class="swatch predicted"></span>Uppskattad mens</li>
+      </ul>
+    </section>
+
+    <section class="backup">
+      <h2>Säkerhetskopia</h2>
+      <p>Dina uppgifter sparas bara i den här webbläsaren på den här enheten. Exportera en kopia då och då så att inget försvinner.</p>
+      <div class="backup-actions">
+        <button type="button" class="btn" id="export-btn">Exportera</button>
+        <label class="btn btn-secondary" for="import-file">Importera</label>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+      </div>
+    </section>
+
+    <p class="disclaimer">Uppskattningarna bygger på dina tidigare cykler och är inte medicinska råd. Använd dem inte som preventivmedel.</p>
+  </main>
+
+  <dialog id="day-dialog" aria-labelledby="dialog-title">
+    <form id="day-form" method="dialog">
+      <h2 id="dialog-title"></h2>
+
+      <fieldset>
+        <legend>Mens</legend>
+        <div class="segmented" id="flow-options"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Humör</legend>
+        <div class="segmented emoji" id="mood-options"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Energi</legend>
+        <div class="segmented" id="energy-options"></div>
+      </fieldset>
+
+      <label class="field">
+        <span>Sömn (timmar)</span>
+        <input type="number" id="sleep" min="0" max="24" step="0.5" inputmode="decimal">
+      </label>
+
+      <fieldset>
+        <legend>Symtom</legend>
+        <div class="chips" id="symptom-options"></div>
+      </fieldset>
+
+      <label class="field">
+        <span>Anteckning</span>
+        <textarea id="note" rows="3" maxlength="2000"></textarea>
+      </label>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-danger" id="clear-day">Rensa dagen</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-secondary" id="cancel-day">Avbryt</button>
+        <button type="submit" class="btn" id="save-day">Spara</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

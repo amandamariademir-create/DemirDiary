@@ -1,0 +1,430 @@
+'use strict';
+
+/* ---------- Inställningar ---------- */
+
+const STORAGE_KEY = 'demirdiary.v1';
+const DEFAULT_CYCLE_LENGTH = 28;
+const DEFAULT_PERIOD_LENGTH = 5;
+const PREDICTED_CYCLES = 3; // hur många kommande menstillfällen som visas i kalendern
+
+const FLOWS = [
+  { value: 'none', label: 'Ingen' },
+  { value: 'spotting', label: 'Stänk' },
+  { value: 'light', label: 'Lätt' },
+  { value: 'medium', label: 'Medel' },
+  { value: 'heavy', label: 'Kraftig' },
+];
+const PERIOD_FLOWS = new Set(['light', 'medium', 'heavy']); // stänk räknas inte som mens
+
+const MOODS = [
+  { value: 1, emoji: '😢', label: 'Mycket dåligt' },
+  { value: 2, emoji: '🙁', label: 'Dåligt' },
+  { value: 3, emoji: '😐', label: 'Okej' },
+  { value: 4, emoji: '🙂', label: 'Bra' },
+  { value: 5, emoji: '😄', label: 'Mycket bra' },
+];
+
+const ENERGY = [1, 2, 3, 4, 5];
+
+const SYMPTOMS = [
+  { value: 'cramps', label: 'Kramper' },
+  { value: 'headache', label: 'Huvudvärk' },
+  { value: 'breasts', label: 'Ömma bröst' },
+  { value: 'bloating', label: 'Uppsvälld' },
+  { value: 'acne', label: 'Akne' },
+];
+
+/* ---------- Datum ---------- */
+
+const DAY_MS = 86400000;
+const pad = (n) => String(n).padStart(2, '0');
+const toKey = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+const KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Dagnummer räknas i UTC så att sommartid inte ger fel antal dagar.
+function keyToDayNum(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return Date.UTC(y, m - 1, d) / DAY_MS;
+}
+function dayNumToKey(n) {
+  const dt = new Date(n * DAY_MS);
+  return toKey(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
+}
+function todayKey() {
+  const t = new Date();
+  return toKey(t.getFullYear(), t.getMonth(), t.getDate());
+}
+function formatDayNum(n, opts = { day: 'numeric', month: 'long' }) {
+  return new Date(n * DAY_MS).toLocaleDateString('sv-SE', { ...opts, timeZone: 'UTC' });
+}
+
+/* ---------- Lagring ---------- */
+
+function sanitizeEntry(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const entry = {};
+  if (FLOWS.some((f) => f.value === raw.flow) && raw.flow !== 'none') entry.flow = raw.flow;
+  const mood = Number(raw.mood);
+  if (MOODS.some((m) => m.value === mood)) entry.mood = mood;
+  const energy = Number(raw.energy);
+  if (ENERGY.includes(energy)) entry.energy = energy;
+  const sleep = Number(raw.sleep);
+  if (raw.sleep !== null && raw.sleep !== '' && raw.sleep !== undefined && Number.isFinite(sleep) && sleep >= 0 && sleep <= 24) {
+    entry.sleep = sleep;
+  }
+  if (Array.isArray(raw.symptoms)) {
+    const valid = raw.symptoms.filter((s) => SYMPTOMS.some((x) => x.value === s));
+    if (valid.length) entry.symptoms = [...new Set(valid)];
+  }
+  if (typeof raw.note === 'string' && raw.note.trim()) entry.note = raw.note.slice(0, 2000);
+  return Object.keys(entry).length ? entry : null;
+}
+
+function sanitizeEntries(raw) {
+  const clean = {};
+  if (!raw || typeof raw !== 'object') return clean;
+  for (const [key, value] of Object.entries(raw)) {
+    if (!KEY_RE.test(key)) continue;
+    const entry = sanitizeEntry(value);
+    if (entry) clean[key] = entry;
+  }
+  return clean;
+}
+
+function loadEntries() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return sanitizeEntries(JSON.parse(raw).entries);
+  } catch {
+    return {};
+  }
+}
+
+function saveEntries() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, entries }));
+    return true;
+  } catch {
+    showToast('Kunde inte spara. Webbläsaren tillåter kanske inte lagring.');
+    return false;
+  }
+}
+
+let entries = loadEntries();
+
+/* ---------- Cykelberäkning ---------- */
+
+const isPeriod = (entry) => !!entry && PERIOD_FLOWS.has(entry.flow);
+const average = (list) => list.reduce((a, b) => a + b, 0) / list.length;
+
+function computeCycle() {
+  const periodDays = Object.keys(entries)
+    .filter((k) => isPeriod(entries[k]))
+    .map(keyToDayNum)
+    .sort((a, b) => a - b);
+
+  // Slå ihop mensdagar till perioder. En missad dag emellan räknas som samma mens.
+  const periods = [];
+  for (const d of periodDays) {
+    const last = periods[periods.length - 1];
+    if (last && d - last.end <= 2) last.end = d;
+    else periods.push({ start: d, end: d });
+  }
+
+  // Cykellängd = dagar mellan två mensstarter. Orimliga värden tas bort.
+  const cycleLengths = [];
+  for (let i = 1; i < periods.length; i++) {
+    const len = periods[i].start - periods[i - 1].start;
+    if (len >= 15 && len <= 60) cycleLengths.push(len);
+  }
+  const recentCycles = cycleLengths.slice(-6);
+  const avgCycle = recentCycles.length ? Math.round(average(recentCycles)) : null;
+
+  const recentPeriods = periods.slice(-6).map((p) => p.end - p.start + 1);
+  const avgPeriod = recentPeriods.length ? Math.round(average(recentPeriods)) : null;
+
+  const today = keyToDayNum(todayKey());
+  const lastStart = periods.length ? periods[periods.length - 1].start : null;
+  const cycleLen = avgCycle ?? DEFAULT_CYCLE_LENGTH;
+  const periodLen = avgPeriod ?? DEFAULT_PERIOD_LENGTH;
+
+  let nextStart = null;
+  const predicted = new Set();
+  if (lastStart !== null) {
+    nextStart = lastStart + cycleLen;
+    for (let c = 0; c < PREDICTED_CYCLES; c++) {
+      const start = nextStart + c * cycleLen;
+      for (let d = start; d < start + periodLen; d++) {
+        const key = dayNumToKey(d);
+        if (d >= today && !isPeriod(entries[key])) predicted.add(key);
+      }
+    }
+  }
+
+  return {
+    today,
+    avgCycle,
+    avgPeriod,
+    nextStart,
+    cycleDay: lastStart !== null && lastStart <= today ? today - lastStart + 1 : null,
+    usingDefault: avgCycle === null,
+    predicted,
+  };
+}
+
+/* ---------- Översikt ---------- */
+
+const $ = (id) => document.getElementById(id);
+
+function renderStats(cycle) {
+  $('stat-cycle-day').textContent = cycle.cycleDay ?? '–';
+  $('stat-avg-cycle').textContent = cycle.avgCycle ? `${cycle.avgCycle} dagar` : '–';
+  $('stat-avg-period').textContent = cycle.avgPeriod ? `${cycle.avgPeriod} dagar` : '–';
+
+  const next = $('stat-next');
+  const sub = $('stat-next-sub');
+  if (cycle.nextStart === null) {
+    next.textContent = '–';
+    sub.textContent = 'Registrera din mens för att få en uppskattning';
+    return;
+  }
+  next.textContent = formatDayNum(cycle.nextStart);
+  const diff = cycle.nextStart - cycle.today;
+  let text;
+  if (diff > 1) text = `om ${diff} dagar`;
+  else if (diff === 1) text = 'imorgon';
+  else if (diff === 0) text = 'idag';
+  else text = `${-diff} ${-diff === 1 ? 'dag' : 'dagar'} sen`;
+  if (cycle.usingDefault) text += ' (antar 28 dagars cykel)';
+  sub.textContent = text;
+}
+
+/* ---------- Kalender ---------- */
+
+const now = new Date();
+let viewYear = now.getFullYear();
+let viewMonth = now.getMonth();
+
+function renderCalendar(cycle) {
+  const title = new Date(viewYear, viewMonth, 1).toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
+  $('month-title').textContent = title;
+
+  const container = $('days');
+  container.replaceChildren();
+
+  const offset = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7; // måndag först
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const tKey = todayKey();
+
+  for (let i = 0; i < offset; i++) {
+    const blank = document.createElement('div');
+    blank.className = 'day empty';
+    container.append(blank);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = toKey(viewYear, viewMonth, d);
+    const entry = entries[key];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'day';
+    btn.dataset.key = key;
+
+    if (entry?.flow) btn.classList.add(`flow-${entry.flow}`);
+    if (cycle.predicted.has(key)) btn.classList.add('predicted');
+    if (key === tKey) btn.classList.add('today');
+    if (key > tKey) btn.classList.add('future');
+
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = d;
+    const mood = document.createElement('span');
+    mood.className = 'mood';
+    mood.textContent = entry?.mood ? MOODS.find((m) => m.value === entry.mood).emoji : '';
+    btn.append(num, mood);
+
+    if (entry?.symptoms?.length || entry?.note) {
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      btn.append(dot);
+    }
+
+    btn.setAttribute('aria-label', describeDay(key, entry, cycle.predicted.has(key)));
+    btn.addEventListener('click', () => openDay(key));
+    container.append(btn);
+  }
+}
+
+function describeDay(key, entry, predicted) {
+  const parts = [formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' })];
+  if (entry?.flow) parts.push(`mens: ${FLOWS.find((f) => f.value === entry.flow).label.toLowerCase()}`);
+  if (entry?.mood) parts.push(`humör: ${MOODS.find((m) => m.value === entry.mood).label.toLowerCase()}`);
+  if (entry?.symptoms?.length || entry?.note) parts.push('har anteckningar');
+  if (predicted) parts.push('uppskattad mens');
+  return parts.join(', ');
+}
+
+function render() {
+  const cycle = computeCycle();
+  renderStats(cycle);
+  renderCalendar(cycle);
+}
+
+/* ---------- Dagsformulär ---------- */
+
+const dialog = $('day-dialog');
+const form = $('day-form');
+let currentKey = null;
+
+function buildOption(type, name, value, text, title) {
+  const label = document.createElement('label');
+  const input = document.createElement('input');
+  input.type = type;
+  input.name = name;
+  input.value = value;
+  const span = document.createElement('span');
+  span.textContent = text;
+  if (title) {
+    label.title = title;
+    input.setAttribute('aria-label', title);
+  }
+  label.append(input, span);
+  return label;
+}
+
+function buildForm() {
+  $('flow-options').append(...FLOWS.map((f) => buildOption('radio', 'flow', f.value, f.label)));
+  $('mood-options').append(...MOODS.map((m) => buildOption('radio', 'mood', m.value, m.emoji, m.label)));
+  $('energy-options').append(...ENERGY.map((e) => buildOption('radio', 'energy', e, e, `Energi ${e} av 5`)));
+  $('symptom-options').append(...SYMPTOMS.map((s) => buildOption('checkbox', 'symptoms', s.value, s.label)));
+}
+
+function openDay(key) {
+  currentKey = key;
+  const entry = entries[key] || {};
+  $('dialog-title').textContent = formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' });
+
+  form.reset();
+  form.querySelector(`input[name="flow"][value="${entry.flow || 'none'}"]`).checked = true;
+  if (entry.mood) form.querySelector(`input[name="mood"][value="${entry.mood}"]`).checked = true;
+  if (entry.energy) form.querySelector(`input[name="energy"][value="${entry.energy}"]`).checked = true;
+  $('sleep').value = entry.sleep ?? '';
+  for (const s of entry.symptoms || []) {
+    form.querySelector(`input[name="symptoms"][value="${s}"]`).checked = true;
+  }
+  $('note').value = entry.note || '';
+
+  dialog.showModal();
+}
+
+// Klick på ett redan valt humör/energi avmarkerar det.
+for (const name of ['mood', 'energy']) {
+  form.addEventListener('pointerdown', (e) => {
+    const label = e.target.closest('label');
+    const input = label?.querySelector(`input[name="${name}"]`);
+    if (input) input.dataset.wasChecked = input.checked ? '1' : '';
+  });
+  form.addEventListener('click', (e) => {
+    if (e.target.matches?.(`input[name="${name}"]`) && e.target.dataset.wasChecked === '1') {
+      e.target.checked = false;
+      e.target.dataset.wasChecked = '';
+    }
+  });
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const data = new FormData(form);
+  const entry = sanitizeEntry({
+    flow: data.get('flow'),
+    mood: data.get('mood'),
+    energy: data.get('energy'),
+    sleep: $('sleep').value,
+    symptoms: data.getAll('symptoms'),
+    note: $('note').value,
+  });
+  if (entry) entries[currentKey] = entry;
+  else delete entries[currentKey];
+  if (saveEntries()) showToast('Sparat');
+  dialog.close();
+  render();
+});
+
+$('clear-day').addEventListener('click', () => {
+  if (!entries[currentKey]) { dialog.close(); return; }
+  if (!confirm('Vill du ta bort allt som är registrerat för den här dagen?')) return;
+  delete entries[currentKey];
+  if (saveEntries()) showToast('Dagen är rensad');
+  dialog.close();
+  render();
+});
+
+$('cancel-day').addEventListener('click', () => dialog.close());
+dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+
+/* ---------- Navigering ---------- */
+
+function shiftMonth(delta) {
+  const d = new Date(viewYear, viewMonth + delta, 1);
+  viewYear = d.getFullYear();
+  viewMonth = d.getMonth();
+  render();
+}
+$('prev-month').addEventListener('click', () => shiftMonth(-1));
+$('next-month').addEventListener('click', () => shiftMonth(1));
+$('go-today').addEventListener('click', () => {
+  const t = new Date();
+  viewYear = t.getFullYear();
+  viewMonth = t.getMonth();
+  render();
+});
+
+/* ---------- Export och import ---------- */
+
+$('export-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({ version: 1, exported: new Date().toISOString(), entries }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `demirdiary-${todayKey()}.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Säkerhetskopian är nedladdad');
+});
+
+$('import-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text());
+    const imported = sanitizeEntries(parsed.entries);
+    const count = Object.keys(imported).length;
+    if (!count) { showToast('Filen innehöll inga dagar att importera'); return; }
+    if (!confirm(`Importera ${count} dagar? Dagar som redan finns skrivs över med uppgifterna från filen.`)) return;
+    entries = { ...entries, ...imported };
+    if (saveEntries()) showToast(`${count} dagar importerade`);
+    render();
+  } catch {
+    showToast('Kunde inte läsa filen. Är det en säkerhetskopia från DemirDiary?');
+  }
+});
+
+/* ---------- Toast ---------- */
+
+let toastTimer;
+function showToast(message) {
+  const toast = $('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+/* ---------- Start ---------- */
+
+buildForm();
+render();
