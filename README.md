@@ -4,8 +4,8 @@ En personlig hälsodagbok för att följa menscykel och mående dag för dag.
 
 ## Funktioner
 
-- **Månadskalender** där mensdagar färgas efter hur mycket du blöder och humöret visas som en emoji.
-- **Dagsformulär** med mens (ingen/stänk/lätt/medel/kraftig), humör, energi, sömn, symtom och en fri anteckning.
+- **Månadskalender** där mensdagar och ägglossning färgas och humöret visas som en emoji.
+- **Dagsformulär** där du markerar mens eller ägglossning och fyller i humör, energi, sömn och en fri anteckning.
 - **Översikt** med cykeldag, snittlängd på cykel och mens, och uppskattning av nästa mens. Kommande mensdagar markeras med streckad ram i kalendern.
 - **Säkerhetskopia**: exportera och importera dina uppgifter som en JSON-fil.
 
@@ -34,7 +34,6 @@ Koden blir publik men dina uppgifter stannar i din egen webbläsare.
 
 ## Hur uppskattningen fungerar
 
-- Dagar med lätt, medel eller kraftig mens räknas som mensdagar (stänk räknas inte).
 - Mensdagar med högst en dags uppehåll räknas som samma mens.
 - Cykellängden är antalet dagar mellan två mensstarter. Snittet räknas på de senaste sex cyklerna.
 - Innan det finns två registrerade menstillfällen antas en cykel på 28 dagar.

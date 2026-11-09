@@ -49,10 +49,8 @@
       <div class="days" id="days"></div>
 
       <ul class="legend">
-        <li><span class="swatch flow-spotting"></span>Stänk</li>
-        <li><span class="swatch flow-light"></span>Lätt</li>
-        <li><span class="swatch flow-medium"></span>Medel</li>
-        <li><span class="swatch flow-heavy"></span>Kraftig</li>
+        <li><span class="swatch mark-period"></span>Mens</li>
+        <li><span class="swatch mark-ovulation"></span>Ägglossning</li>
         <li><span class="swatch predicted"></span>Uppskattad mens</li>
       </ul>
     </section>
@@ -75,8 +73,8 @@
       <h2 id="dialog-title"></h2>
 
       <fieldset>
-        <legend>Mens</legend>
-        <div class="segmented" id="flow-options"></div>
+        <legend>Markera dagen</legend>
+        <div class="segmented" id="mark-options"></div>
       </fieldset>
 
       <fieldset>
@@ -93,11 +91,6 @@
         <span>Sömn (timmar)</span>
         <input type="number" id="sleep" min="0" max="24" step="0.5" inputmode="decimal">
       </label>
-
-      <fieldset>
-        <legend>Symtom</legend>
-        <div class="chips" id="symptom-options"></div>
-      </fieldset>
 
       <label class="field">
         <span>Anteckning</span>

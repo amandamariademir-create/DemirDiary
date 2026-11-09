@@ -7,14 +7,13 @@ const DEFAULT_CYCLE_LENGTH = 28;
 const DEFAULT_PERIOD_LENGTH = 5;
 const PREDICTED_CYCLES = 3; // hur många kommande menstillfällen som visas i kalendern
 
-const FLOWS = [
-  { value: 'none', label: 'Ingen' },
-  { value: 'spotting', label: 'Stänk' },
-  { value: 'light', label: 'Lätt' },
-  { value: 'medium', label: 'Medel' },
-  { value: 'heavy', label: 'Kraftig' },
+const MARKS = [
+  { value: 'none', label: 'Inget' },
+  { value: 'period', label: 'Mens' },
+  { value: 'ovulation', label: 'Ägglossning' },
 ];
-const PERIOD_FLOWS = new Set(['light', 'medium', 'heavy']); // stänk räknas inte som mens
+// Äldre sparade uppgifter hade mängd mens. Lätt, medel och kraftig blir "mens".
+const LEGACY_PERIOD_FLOWS = new Set(['light', 'medium', 'heavy']);
 
 const MOODS = [
   { value: 1, emoji: '😢', label: 'Mycket dåligt' },
@@ -25,14 +24,6 @@ const MOODS = [
 ];
 
 const ENERGY = [1, 2, 3, 4, 5];
-
-const SYMPTOMS = [
-  { value: 'cramps', label: 'Kramper' },
-  { value: 'headache', label: 'Huvudvärk' },
-  { value: 'breasts', label: 'Ömma bröst' },
-  { value: 'bloating', label: 'Uppsvälld' },
-  { value: 'acne', label: 'Akne' },
-];
 
 /* ---------- Datum ---------- */
 
@@ -63,7 +54,8 @@ function formatDayNum(n, opts = { day: 'numeric', month: 'long' }) {
 function sanitizeEntry(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const entry = {};
-  if (FLOWS.some((f) => f.value === raw.flow) && raw.flow !== 'none') entry.flow = raw.flow;
+  const mark = raw.mark ?? (LEGACY_PERIOD_FLOWS.has(raw.flow) ? 'period' : undefined);
+  if (mark === 'period' || mark === 'ovulation') entry.mark = mark;
   const mood = Number(raw.mood);
   if (MOODS.some((m) => m.value === mood)) entry.mood = mood;
   const energy = Number(raw.energy);
@@ -71,10 +63,6 @@ function sanitizeEntry(raw) {
   const sleep = Number(raw.sleep);
   if (raw.sleep !== null && raw.sleep !== '' && raw.sleep !== undefined && Number.isFinite(sleep) && sleep >= 0 && sleep <= 24) {
     entry.sleep = sleep;
-  }
-  if (Array.isArray(raw.symptoms)) {
-    const valid = raw.symptoms.filter((s) => SYMPTOMS.some((x) => x.value === s));
-    if (valid.length) entry.symptoms = [...new Set(valid)];
   }
   if (typeof raw.note === 'string' && raw.note.trim()) entry.note = raw.note.slice(0, 2000);
   return Object.keys(entry).length ? entry : null;
@@ -115,7 +103,7 @@ let entries = loadEntries();
 
 /* ---------- Cykelberäkning ---------- */
 
-const isPeriod = (entry) => !!entry && PERIOD_FLOWS.has(entry.flow);
+const isPeriod = (entry) => !!entry && entry.mark === 'period';
 const average = (list) => list.reduce((a, b) => a + b, 0) / list.length;
 
 function computeCycle() {
@@ -231,7 +219,7 @@ function renderCalendar(cycle) {
     btn.className = 'day';
     btn.dataset.key = key;
 
-    if (entry?.flow) btn.classList.add(`flow-${entry.flow}`);
+    if (entry?.mark) btn.classList.add(`mark-${entry.mark}`);
     if (cycle.predicted.has(key)) btn.classList.add('predicted');
     if (key === tKey) btn.classList.add('today');
     if (key > tKey) btn.classList.add('future');
@@ -244,7 +232,7 @@ function renderCalendar(cycle) {
     mood.textContent = entry?.mood ? MOODS.find((m) => m.value === entry.mood).emoji : '';
     btn.append(num, mood);
 
-    if (entry?.symptoms?.length || entry?.note) {
+    if (entry?.note) {
       const dot = document.createElement('span');
       dot.className = 'dot';
       btn.append(dot);
@@ -258,9 +246,9 @@ function renderCalendar(cycle) {
 
 function describeDay(key, entry, predicted) {
   const parts = [formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' })];
-  if (entry?.flow) parts.push(`mens: ${FLOWS.find((f) => f.value === entry.flow).label.toLowerCase()}`);
+  if (entry?.mark) parts.push(MARKS.find((m) => m.value === entry.mark).label.toLowerCase());
   if (entry?.mood) parts.push(`humör: ${MOODS.find((m) => m.value === entry.mood).label.toLowerCase()}`);
-  if (entry?.symptoms?.length || entry?.note) parts.push('har anteckningar');
+  if (entry?.note) parts.push('har anteckning');
   if (predicted) parts.push('uppskattad mens');
   return parts.join(', ');
 }
@@ -294,10 +282,9 @@ function buildOption(type, name, value, text, title) {
 }
 
 function buildForm() {
-  $('flow-options').append(...FLOWS.map((f) => buildOption('radio', 'flow', f.value, f.label)));
+  $('mark-options').append(...MARKS.map((m) => buildOption('radio', 'mark', m.value, m.label)));
   $('mood-options').append(...MOODS.map((m) => buildOption('radio', 'mood', m.value, m.emoji, m.label)));
   $('energy-options').append(...ENERGY.map((e) => buildOption('radio', 'energy', e, e, `Energi ${e} av 5`)));
-  $('symptom-options').append(...SYMPTOMS.map((s) => buildOption('checkbox', 'symptoms', s.value, s.label)));
 }
 
 function openDay(key) {
@@ -306,13 +293,10 @@ function openDay(key) {
   $('dialog-title').textContent = formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' });
 
   form.reset();
-  form.querySelector(`input[name="flow"][value="${entry.flow || 'none'}"]`).checked = true;
+  form.querySelector(`input[name="mark"][value="${entry.mark || 'none'}"]`).checked = true;
   if (entry.mood) form.querySelector(`input[name="mood"][value="${entry.mood}"]`).checked = true;
   if (entry.energy) form.querySelector(`input[name="energy"][value="${entry.energy}"]`).checked = true;
   $('sleep').value = entry.sleep ?? '';
-  for (const s of entry.symptoms || []) {
-    form.querySelector(`input[name="symptoms"][value="${s}"]`).checked = true;
-  }
   $('note').value = entry.note || '';
 
   dialog.showModal();
@@ -337,11 +321,10 @@ form.addEventListener('submit', (e) => {
   e.preventDefault();
   const data = new FormData(form);
   const entry = sanitizeEntry({
-    flow: data.get('flow'),
+    mark: data.get('mark'),
     mood: data.get('mood'),
     energy: data.get('energy'),
     sleep: $('sleep').value,
-    symptoms: data.getAll('symptoms'),
     note: $('note').value,
   });
   if (entry) entries[currentKey] = entry;
