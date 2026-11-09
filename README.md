@@ -32,6 +32,17 @@ och gå till http://localhost:8000.
 
 Koden blir publik men dina uppgifter stannar i din egen webbläsare.
 
+## Installera som app
+
+När sidan är publicerad (till exempel med GitHub Pages) kan den läggas på hemskärmen och fungerar då utan internet.
+
+- **iPhone:** öppna adressen i Safari och tryck på *Dela → Lägg till på hemskärmen*.
+- **Android:** öppna adressen i Chrome och tryck på *⋮ → Installera app*.
+
+Appen på hemskärmen har sin egen lagring. Har du redan fyllt i uppgifter i webbläsaren: tryck på **Exportera** där och sedan **Importera** i appen.
+
+När du ändrar i koden, höj versionen i `CACHE` i `sw.js` (till exempel `demirdiary-v2`) så att gamla sparade filer rensas.
+
 ## Hur uppskattningen fungerar
 
 - Mensdagar med högst en dags uppehåll räknas som samma mens.

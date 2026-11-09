@@ -447,3 +447,18 @@ function showToast(message) {
 
 buildForm();
 render();
+
+/* ---------- App (PWA) ---------- */
+
+// Gör att sidan kan installeras på hemskärmen och fungera utan internet.
+// Fungerar bara när sidan är publicerad (https), inte när index.html öppnas som fil.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+// Be webbläsaren att inte rensa dagboken automatiskt när det blir ont om utrymme.
+if (navigator.storage?.persist) {
+  navigator.storage.persisted().then((done) => done || navigator.storage.persist()).catch(() => {});
+}
