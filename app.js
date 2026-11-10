@@ -164,10 +164,7 @@ function renderCalendar(cycle) {
     const num = document.createElement('span');
     num.className = 'num';
     num.textContent = d;
-    const mood = document.createElement('span');
-    mood.className = 'mood';
-    mood.textContent = entry?.mood ? MOODS.find((m) => m.value === entry.mood).emoji : '';
-    btn.append(num, mood);
+    btn.append(num);
 
     const acts = ACTIVITIES.filter((a) => entry?.[a.key]).map((a) => a.emoji).join('');
     if (acts) {
@@ -192,7 +189,6 @@ function renderCalendar(cycle) {
 function describeDay(key, entry, predicted, predictedOvulation) {
   const parts = [formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' })];
   if (entry?.mark) parts.push(MARKS.find((m) => m.value === entry.mark).label.toLowerCase());
-  if (entry?.mood) parts.push(`humör: ${MOODS.find((m) => m.value === entry.mood).label.toLowerCase()}`);
   for (const a of ACTIVITIES) {
     if (!entry?.[a.key]) continue;
     const m = minutesOf(entry, a.key);
@@ -234,7 +230,6 @@ function buildOption(type, name, value, text, title) {
 
 function buildForm() {
   $('mark-options').append(...MARKS.map((m) => buildOption('radio', 'mark', m.value, m.label)));
-  $('mood-options').append(...MOODS.map((m) => buildOption('radio', 'mood', m.value, m.emoji, m.label)));
 }
 
 function openDay(key) {
@@ -244,7 +239,6 @@ function openDay(key) {
 
   form.reset();
   form.querySelector(`input[name="mark"][value="${entry.mark || 'none'}"]`).checked = true;
-  if (entry.mood) form.querySelector(`input[name="mood"][value="${entry.mood}"]`).checked = true;
   for (const a of ACTIVITIES) {
     const input = $(a.key);
     input.value = minutesOf(entry, a.key) ?? '';
@@ -257,27 +251,11 @@ function openDay(key) {
   dialog.showModal();
 }
 
-// Klick på ett redan valt humör avmarkerar det.
-for (const name of ['mood']) {
-  form.addEventListener('pointerdown', (e) => {
-    const label = e.target.closest('label');
-    const input = label?.querySelector(`input[name="${name}"]`);
-    if (input) input.dataset.wasChecked = input.checked ? '1' : '';
-  });
-  form.addEventListener('click', (e) => {
-    if (e.target.matches?.(`input[name="${name}"]`) && e.target.dataset.wasChecked === '1') {
-      e.target.checked = false;
-      e.target.dataset.wasChecked = '';
-    }
-  });
-}
-
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const data = new FormData(form);
   const entry = sanitizeEntry({
     mark: data.get('mark'),
-    mood: data.get('mood'),
     ...Object.fromEntries(ACTIVITIES.map((a) => {
       const input = $(a.key);
       const value = input.value.trim();

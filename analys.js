@@ -4,8 +4,6 @@
 
 const entries = loadEntries();
 const RANGE_KEY = 'demirdiary.analysRange';
-const MAX_GAP = 3; // dagar mellan två värden som fortfarande binds ihop med en linje
-const MIN_COMPARE_DAYS = 3; // minsta antal dagar i varje grupp för att jämföra
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const state = {
@@ -32,7 +30,6 @@ function rangeBounds() {
 }
 
 const entryFor = (dayNum) => entries[dayNumToKey(dayNum)];
-const moodOf = (value) => MOODS.find((m) => m.value === value);
 const formatNumber = (n, digits = 1) => n.toLocaleString('sv-SE', { maximumFractionDigits: digits, minimumFractionDigits: 0 });
 const average = (list) => list.reduce((a, b) => a + b, 0) / list.length;
 const activityText = (entry, key) => {
@@ -54,16 +51,6 @@ function collect(field) {
 /* ---------- Sammanfattning ---------- */
 
 function renderStats() {
-  const moods = collect('mood');
-  if (moods.length) {
-    const avg = average(moods.map((p) => p.value));
-    $('stat-mood').textContent = `${formatNumber(avg)} ${moodOf(Math.round(avg)).emoji}`;
-    $('stat-mood-sub').textContent = `snitt av ${moods.length} ${moods.length === 1 ? 'dag' : 'dagar'}`;
-  } else {
-    $('stat-mood').textContent = '–';
-    $('stat-mood-sub').textContent = 'inget ifyllt ännu';
-  }
-
   const { start, end } = rangeBounds();
   for (const a of ACTIVITIES) {
     let days = 0;
@@ -82,78 +69,11 @@ function renderStats() {
   }
 }
 
-/* ---------- Jämförelse: humör med och utan aktivitet ---------- */
-
-function compareActivity(activity) {
-  const { start, end } = rangeBounds();
-  const withMood = [];
-  const withoutMood = [];
-  for (let d = start; d <= end; d++) {
-    const e = entryFor(d);
-    // En dag utan något ifyllt räknas varken som med eller utan.
-    if (!e || typeof e.mood !== 'number') continue;
-    (e[activity.key] ? withMood : withoutMood).push(e.mood);
-  }
-  return { withMood, withoutMood };
-}
-
-const signed = (d) => {
-  const r = Math.round(d * 10) / 10; // samma avrundning som visas, så att det inte står "+0"
-  return `${r > 0 ? '+' : r < 0 ? '−' : '±'}${formatNumber(Math.abs(r))}`;
-};
-
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
-}
-
-function renderCompare() {
-  const root = $('compare');
-  root.replaceChildren();
-
-  for (const activity of ACTIVITIES) {
-    const { withMood, withoutMood } = compareActivity(activity);
-    const block = el('div', 'compare-block');
-    const head = el('div', 'compare-head');
-    head.append(el('h3', '', `${activity.emoji} ${activity.label}`));
-    block.append(head);
-
-    if (withMood.length < MIN_COMPARE_DAYS || withoutMood.length < MIN_COMPARE_DAYS) {
-      block.append(el('p', 'compare-empty',
-        `Behöver humör ifyllt på minst ${MIN_COMPARE_DAYS} dagar med och ${MIN_COMPARE_DAYS} utan ${activity.label.toLowerCase()} (nu ${withMood.length} och ${withoutMood.length}).`));
-      root.append(block);
-      continue;
-    }
-
-    const withAvg = average(withMood);
-    const withoutAvg = average(withoutMood);
-    const rows = [
-      { name: `Med ${activity.label.toLowerCase()}`, value: withAvg, n: withMood.length, cls: 'series-mood' },
-      { name: 'Utan', value: withoutAvg, n: withoutMood.length, cls: 'bar-neutral' },
-    ];
-    const metric = el('div', 'compare-metric');
-    for (const r of rows) {
-      const row = el('div', 'bar-row');
-      row.setAttribute('role', 'img');
-      row.setAttribute('aria-label', `${r.name}: humör ${formatNumber(r.value)} av 5, snitt av ${r.n} dagar`);
-      const track = el('span', 'bar-track');
-      const bar = el('span', `bar ${r.cls}`);
-      bar.style.width = `${Math.max(2, (r.value / 5) * 100)}%`;
-      track.append(bar);
-      row.append(
-        el('span', 'bar-name', r.name),
-        track,
-        el('span', 'bar-value', `${formatNumber(r.value)} ${moodOf(Math.round(r.value)).emoji}`),
-        el('span', 'bar-n', `${r.n} d`),
-      );
-      metric.append(row);
-    }
-    metric.append(el('div', 'compare-diff', `Skillnad ${signed(withAvg - withoutAvg)} på skalan 1–5`));
-    block.append(metric);
-    root.append(block);
-  }
 }
 
 /* ---------- Grafer ---------- */
@@ -197,35 +117,6 @@ function drawYGrid(root, geom, config) {
     label.textContent = config.yLabel(t);
   }
   svg('line', { x1: pad.left, x2: width - pad.right, y1: pad.top + plotH, y2: pad.top + plotH, class: 'axis' }, root);
-}
-
-function drawLine(root, geom, config) {
-  const { x, y, points } = geom;
-  drawYGrid(root, geom, config);
-
-  // Linje: binds ihop när det är högst MAX_GAP dagar mellan värdena
-  let d = '';
-  const isolated = [];
-  points.forEach((p, i) => {
-    const prev = points[i - 1];
-    const next = points[i + 1];
-    const joinPrev = prev && p.day - prev.day <= MAX_GAP;
-    const joinNext = next && next.day - p.day <= MAX_GAP;
-    d += `${joinPrev ? 'L' : 'M'}${x(p.day).toFixed(1)},${y(p.value).toFixed(1)}`;
-    if (!joinPrev && !joinNext) isolated.push(p);
-  });
-  if (d) svg('path', { d, class: `line ${config.seriesClass}` }, root);
-  for (const p of isolated) {
-    svg('circle', { cx: x(p.day), cy: y(p.value), r: 4, class: `dot ${config.seriesClass}` }, root);
-  }
-
-  // Senaste värdet markeras och skrivs ut vid slutet av linjen
-  const last = points[points.length - 1];
-  if (last) {
-    svg('circle', { cx: x(last.day), cy: y(last.value), r: 4, class: `dot ${config.seriesClass}` }, root);
-    const label = svg('text', { x: x(last.day) + 8, y: y(last.value), class: 'end-label' }, root);
-    label.textContent = config.endLabel(last.value);
-  }
 }
 
 // Stapel med rundade hörn upptill och rak kant mot nollinjen.
@@ -306,8 +197,7 @@ function createChart(container, config) {
       }, root);
     }
 
-    if (config.kind === 'bars') drawBars(root, geom, config);
-    else drawLine(root, geom, config);
+    drawBars(root, geom, config);
 
     for (const t of xTicks(start, end, x)) {
       const label = svg('text', { x: x(t.day), y: height - 6, class: 'tick tick-x' }, root);
@@ -321,7 +211,7 @@ function createChart(container, config) {
 
     layer = svg('g', { class: 'hover-layer' }, root);
 
-    // Hela grafens bredd fångar pekaren, så att man träffar datumet och inte behöver träffa linjen.
+    // Hela grafens bredd fångar pekaren, så att man träffar datumet och inte behöver träffa stapeln.
     const hit = svg('rect', { x: 0, y: 0, width, height: pad.top + plotH, class: 'hit' }, root);
     const dayAt = (clientX) => {
       const rect = root.getBoundingClientRect();
@@ -364,12 +254,6 @@ function createChart(container, config) {
 
     const cx = geom.x(day);
     svg('line', { x1: cx, x2: cx, y1: geom.pad.top, y2: geom.pad.top + geom.plotH, class: 'crosshair' }, layer);
-    if (config.kind !== 'bars') {
-      const value = entryFor(day)?.[config.field];
-      if (typeof value === 'number') {
-        svg('circle', { cx, cy: geom.y(value), r: 5, class: `dot ${config.seriesClass}` }, layer);
-      }
-    }
 
     if (state.activeChart !== chart) return;
     fillTooltip(tooltip, day);
@@ -403,15 +287,12 @@ function fillTooltip(box, day) {
   };
 
   for (const a of ACTIVITIES) row(`rect-key act-${a.key}`, activityText(e, a.key), a.label.toLowerCase());
-  const mood = typeof e.mood === 'number' ? moodOf(e.mood) : null;
-  row('line-key series-mood', mood ? mood.emoji : '–', mood ? mood.label.toLowerCase() : 'humör');
 
   if (e.mark) box.append(el('div', 'tooltip-mark', e.mark === 'period' ? 'Mens' : 'Ägglossning'));
 }
 
 function buildActivityChart(a) {
   return createChart($(`${a.key}-chart`), {
-    kind: 'bars',
     field: a.key,
     domain: minutesDomain,
     yTicks: (min, max) => {
@@ -432,23 +313,7 @@ function buildActivityChart(a) {
   });
 }
 
-const charts = [
-  ...ACTIVITIES.map(buildActivityChart),
-  createChart($('mood-chart'), {
-    field: 'mood',
-    seriesClass: 'series-mood',
-    height: 170,
-    domain: () => [0.6, 5.4],
-    yTicks: () => [1, 2, 3, 4, 5],
-    yLabel: (t) => moodOf(t).emoji,
-    endLabel: (v) => moodOf(v).emoji,
-    isEmpty: (points) => !points.length,
-    emptyText: 'Inget humör ifyllt under perioden',
-    describe: (points) => points.length
-      ? `Humör från 1 till 5, ${points.length} dagar. Använd piltangenterna för att gå mellan dagarna.`
-      : 'Humör: inga värden under perioden.',
-  }),
-];
+const charts = ACTIVITIES.map(buildActivityChart);
 
 function setHover(day, chart) {
   state.hoverDay = day;
@@ -467,11 +332,9 @@ function renderTable() {
     const e = entryFor(d);
     if (!e) continue;
     const tr = document.createElement('tr');
-    const mood = e.mood ? moodOf(e.mood) : null;
     const cells = [
       formatDayNum(d, { weekday: 'short', day: 'numeric', month: 'short' }),
       ...ACTIVITIES.map((a) => activityText(e, a.key)),
-      mood ? `${mood.emoji} ${mood.label}` : '–',
       e.mark === 'period' ? 'Mens' : e.mark === 'ovulation' ? 'Ägglossning' : '',
     ];
     cells.forEach((text, i) => {
@@ -495,7 +358,6 @@ function renderAll() {
   state.hoverDay = null;
   state.activeChart = null;
   renderStats();
-  renderCompare();
   for (const c of charts) c.render();
   renderTable();
 }
@@ -511,12 +373,12 @@ $('range-filter').addEventListener('click', (e) => {
 // Rita om när skärmen ändrar bredd, till exempel när telefonen vrids.
 let lastWidth = 0;
 new ResizeObserver(() => {
-  const w = $('mood-chart').clientWidth;
+  const w = $('exercise-chart').clientWidth;
   if (w !== lastWidth) {
     lastWidth = w;
     for (const c of charts) c.render();
   }
-}).observe($('mood-chart'));
+}).observe($('exercise-chart'));
 
 // Dölj rutan när man trycker utanför graferna på en pekskärm.
 document.addEventListener('pointerdown', (e) => {

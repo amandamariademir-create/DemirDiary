@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#c0304e">
   <title>DemirDiary – Analys</title>
-  <meta name="description" content="Träning, dagsljus och mående över tid.">
+  <meta name="description" content="Träning och dagsljus över tid.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -32,12 +32,7 @@
       <button type="button" data-days="365">1 år</button>
     </div>
 
-    <section class="stats" aria-label="Sammanfattning för perioden">
-      <div class="stat">
-        <span class="stat-label">Humör</span>
-        <span class="stat-value" id="stat-mood">–</span>
-        <span class="stat-sub" id="stat-mood-sub"></span>
-      </div>
+    <section class="stats stats-two" aria-label="Sammanfattning för perioden">
       <div class="stat">
         <span class="stat-label">🏃 Träning</span>
         <span class="stat-value" id="stat-exercise">–</span>
@@ -50,13 +45,6 @@
       </div>
     </section>
 
-    <section class="chart-card compare-card" aria-labelledby="compare-title">
-      <h2 id="compare-title">Humör med och utan</h2>
-      <p class="chart-sub">Snitthumör på dagar med och utan träning eller dagsljus</p>
-      <div id="compare"></div>
-      <p class="compare-note">Visar hur värdena hänger ihop, inte vad som orsakar vad.</p>
-    </section>
-
     <section class="chart-card" aria-labelledby="exercise-title">
       <h2 id="exercise-title"><span class="swatch act-exercise"></span>Träning</h2>
       <p class="chart-sub">Minuter per dag</p>
@@ -67,12 +55,6 @@
       <h2 id="daylight-title"><span class="swatch act-daylight"></span>Dagsljus</h2>
       <p class="chart-sub">Minuter ute i dagsljus per dag</p>
       <div class="chart" id="daylight-chart"></div>
-    </section>
-
-    <section class="chart-card" aria-labelledby="mood-title">
-      <h2 id="mood-title"><span class="line-key series-mood"></span>Humör</h2>
-      <p class="chart-sub">Från 😢 mycket dåligt till 😄 mycket bra</p>
-      <div class="chart" id="mood-chart"></div>
     </section>
 
     <ul class="legend chart-legend" aria-label="Bakgrund i graferna">
@@ -89,7 +71,6 @@
               <th scope="col">Datum</th>
               <th scope="col">Träning</th>
               <th scope="col">Dagsljus</th>
-              <th scope="col">Humör</th>
               <th scope="col">Markering</th>
             </tr>
           </thead>

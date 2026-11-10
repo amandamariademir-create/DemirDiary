@@ -18,14 +18,6 @@ const MARKS = [
 // Äldre sparade uppgifter hade mängd mens. Lätt, medel och kraftig blir "mens".
 const LEGACY_PERIOD_FLOWS = new Set(['light', 'medium', 'heavy']);
 
-const MOODS = [
-  { value: 1, emoji: '😢', label: 'Mycket dåligt' },
-  { value: 2, emoji: '🙁', label: 'Dåligt' },
-  { value: 3, emoji: '😐', label: 'Okej' },
-  { value: 4, emoji: '🙂', label: 'Bra' },
-  { value: 5, emoji: '😄', label: 'Mycket bra' },
-];
-
 const ACTIVITIES = [
   { key: 'exercise', label: 'Träning', emoji: '🏃' },
   { key: 'daylight', label: 'Dagsljus', emoji: '☀️' },
@@ -66,8 +58,6 @@ function sanitizeEntry(raw) {
   const entry = {};
   const mark = raw.mark ?? (LEGACY_PERIOD_FLOWS.has(raw.flow) ? 'period' : undefined);
   if (mark === 'period' || mark === 'ovulation') entry.mark = mark;
-  const mood = Number(raw.mood);
-  if (MOODS.some((m) => m.value === mood)) entry.mood = mood;
   // Träning och dagsljus sparas i minuter. "true" kommer från en äldre version
   // där man bara markerade ja/nej, och betyder att tiden saknas.
   for (const a of ACTIVITIES) {
