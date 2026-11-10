@@ -1,7 +1,7 @@
 'use strict';
 
 // Höj versionen när filerna ändras så att gamla cachen rensas.
-const CACHE = 'demirdiary-v5';
+const CACHE = 'demirdiary-v6';
 const FILES = [
   './',
   './index.html',
@@ -31,13 +31,15 @@ self.addEventListener('activate', (event) => {
 });
 
 // Försök hämta från nätet först så att uppdateringar syns direkt.
-// Utan internet används den sparade kopian.
+// "no-cache" gör att webbläsaren alltid frågar servern om filen har ändrats,
+// i stället för att använda en gammal kopia ur sin egen cache. Annars kan en
+// gammal sida blandas med ny kod. Utan internet används den sparade kopian.
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(request)
+    fetch(request, { cache: 'no-cache' })
       .then((response) => {
         if (response.ok) {
           const copy = response.clone();

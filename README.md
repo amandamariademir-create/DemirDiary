@@ -42,7 +42,7 @@ När sidan är publicerad (till exempel med GitHub Pages) kan den läggas på he
 
 Appen på hemskärmen har sin egen lagring. Har du redan fyllt i uppgifter i webbläsaren: tryck på **Exportera** där och sedan **Importera** i appen.
 
-När du ändrar i koden, höj versionen i `CACHE` i `sw.js` (till exempel `demirdiary-v2`) så att gamla sparade filer rensas.
+När du ändrar i koden: höj versionen i `CACHE` i `sw.js` och siffran efter `?v=` i `index.html` och `analys.html`, så att gamla sparade filer rensas och sidan aldrig blandar gammal och ny kod.
 
 ## Hur uppskattningen fungerar
 
