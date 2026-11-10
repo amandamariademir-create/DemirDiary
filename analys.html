@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <header class="app-header">
@@ -62,28 +62,18 @@
       <p class="compare-note">Visar hur värdena hänger ihop, inte vad som orsakar vad.</p>
     </section>
 
-    <section class="chart-card" aria-labelledby="sleep-title">
-      <h2 id="sleep-title"><span class="line-key series-sleep"></span>Sömn</h2>
-      <p class="chart-sub">Timmar natten mot dagen</p>
-      <div class="chart" id="sleep-chart"></div>
+    <section class="chart-card" aria-labelledby="combined-title">
+      <h2 id="combined-title">Sömn, träning och dagsljus</h2>
+      <p class="chart-sub">Timmar per dag. Sömnen gäller natten mot dagen.</p>
+      <ul class="legend chart-key" aria-label="Förklaring">
+        <li><span class="line-key series-sleep"></span>Sömn</li>
+        <li><span class="swatch act-exercise"></span>Träning</li>
+        <li><span class="swatch act-daylight"></span>Dagsljus</li>
+        <li><span class="swatch band-period"></span>Mens</li>
+        <li><span class="swatch band-ovulation"></span>Ägglossning</li>
+      </ul>
+      <div class="chart" id="combined-chart"></div>
     </section>
-
-    <section class="chart-card" aria-labelledby="exercise-title">
-      <h2 id="exercise-title"><span class="swatch act-exercise"></span>Träning</h2>
-      <p class="chart-sub">Minuter per dag</p>
-      <div class="chart" id="exercise-chart"></div>
-    </section>
-
-    <section class="chart-card" aria-labelledby="daylight-title">
-      <h2 id="daylight-title"><span class="swatch act-daylight"></span>Dagsljus</h2>
-      <p class="chart-sub">Minuter ute i dagsljus per dag</p>
-      <div class="chart" id="daylight-chart"></div>
-    </section>
-
-    <ul class="legend chart-legend" aria-label="Bakgrund i graferna">
-      <li><span class="swatch band-period"></span>Mens</li>
-      <li><span class="swatch band-ovulation"></span>Ägglossning</li>
-    </ul>
 
     <details class="table-view">
       <summary>Visa som tabell</summary>
@@ -106,7 +96,7 @@
     </details>
   </main>
 
-  <script src="common.js?v=7"></script>
-  <script src="analys.js?v=7"></script>
+  <script src="common.js?v=8"></script>
+  <script src="analys.js?v=8"></script>
 </body>
 </html>

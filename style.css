@@ -15,8 +15,8 @@
   --predicted: #e5677f;
   --shadow: 0 1px 3px rgba(60, 20, 30, 0.08);
   /* Grafer */
-  --act-exercise: #6250d6;
-  --act-daylight: #eda100;
+  --act-exercise: #eb6834;
+  --act-daylight: #1baf7a;
   --series-sleep: #2a78d6;
   --bar-neutral: #c9bcc1;
   --grid: #efe6e9;
@@ -43,8 +43,8 @@
     --predicted-ovulation: #7cc4e4;
     --predicted: #f07a93;
     --shadow: none;
-    --act-exercise: #9085e9;
-    --act-daylight: #c98500;
+    --act-exercise: #d95926;
+    --act-daylight: #199e70;
     --series-sleep: #3987e5;
     --bar-neutral: #5a4c52;
     --grid: #33292d;
@@ -440,7 +440,8 @@ legend, .field > span {
 .swatch.band-ovulation { background: var(--band-ovulation); border-color: transparent; }
 .swatch.act-exercise { background: var(--act-exercise); border-color: transparent; }
 .swatch.act-daylight { background: var(--act-daylight); border-color: transparent; }
-.chart-key { margin: 4px 0 4px; padding: 0 4px; }
+.chart-key { margin: 4px 0 8px; padding: 0 4px; }
+.chart-key .line-key { margin: 6px 0; }
 
 
 .table-view {
