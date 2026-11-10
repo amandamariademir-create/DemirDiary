@@ -26,12 +26,14 @@ const MOODS = [
   { value: 5, emoji: '😄', label: 'Mycket bra' },
 ];
 
-const ENERGY = [1, 2, 3, 4, 5];
-
 const ACTIVITIES = [
   { key: 'exercise', label: 'Träning', emoji: '🏃' },
   { key: 'daylight', label: 'Dagsljus', emoji: '☀️' },
 ];
+const MAX_MINUTES = 1440;
+
+const minutesOf = (entry, key) => (typeof entry?.[key] === 'number' ? entry[key] : null);
+const formatMinutes = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`);
 
 /* ---------- Datum ---------- */
 
@@ -66,18 +68,15 @@ function sanitizeEntry(raw) {
   if (mark === 'period' || mark === 'ovulation') entry.mark = mark;
   const mood = Number(raw.mood);
   if (MOODS.some((m) => m.value === mood)) entry.mood = mood;
-  const energy = Number(raw.energy);
-  if (ENERGY.includes(energy)) entry.energy = energy;
-  const sleep = Number(raw.sleep);
-  if (raw.sleep !== null && raw.sleep !== '' && raw.sleep !== undefined && Number.isFinite(sleep) && sleep >= 0 && sleep <= 24) {
-    entry.sleep = sleep;
-  }
-  const wakeups = Number(raw.wakeups);
-  if (raw.wakeups !== null && raw.wakeups !== '' && raw.wakeups !== undefined && Number.isInteger(wakeups) && wakeups >= 0 && wakeups <= 50) {
-    entry.wakeups = wakeups;
-  }
+  // Träning och dagsljus sparas i minuter. "true" kommer från en äldre version
+  // där man bara markerade ja/nej, och betyder att tiden saknas.
   for (const a of ACTIVITIES) {
-    if (raw[a.key] === true || raw[a.key] === 'on') entry[a.key] = true;
+    const v = raw[a.key];
+    const minutes = Math.round(Number(v));
+    if (v === true || v === 'on') entry[a.key] = true;
+    else if (v !== null && v !== '' && v !== undefined && Number.isFinite(minutes) && minutes > 0 && minutes <= MAX_MINUTES) {
+      entry[a.key] = minutes;
+    }
   }
   if (typeof raw.note === 'string' && raw.note.trim()) entry.note = raw.note.slice(0, 2000);
   return Object.keys(entry).length ? entry : null;

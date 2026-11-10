@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#c0304e">
   <title>DemirDiary – Analys</title>
-  <meta name="description" content="Sömn, energi och mående över tid.">
+  <meta name="description" content="Träning, dagsljus och mående över tid.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -32,56 +32,41 @@
       <button type="button" data-days="365">1 år</button>
     </div>
 
-    <section class="stats stats-four" aria-label="Snittvärden för perioden">
-      <div class="stat">
-        <span class="stat-label">Sömn</span>
-        <span class="stat-value" id="avg-sleep">–</span>
-        <span class="stat-sub" id="avg-sleep-sub"></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Energi</span>
-        <span class="stat-value" id="avg-energy">–</span>
-        <span class="stat-sub" id="avg-energy-sub"></span>
-      </div>
+    <section class="stats" aria-label="Sammanfattning för perioden">
       <div class="stat">
         <span class="stat-label">Humör</span>
-        <span class="stat-value" id="avg-mood">–</span>
-        <span class="stat-sub" id="avg-mood-sub"></span>
+        <span class="stat-value" id="stat-mood">–</span>
+        <span class="stat-sub" id="stat-mood-sub"></span>
       </div>
       <div class="stat">
-        <span class="stat-label">Uppvaknanden</span>
-        <span class="stat-value" id="avg-wakeups">–</span>
-        <span class="stat-sub" id="avg-wakeups-sub"></span>
+        <span class="stat-label">🏃 Träning</span>
+        <span class="stat-value" id="stat-exercise">–</span>
+        <span class="stat-sub" id="stat-exercise-sub"></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">☀️ Dagsljus</span>
+        <span class="stat-value" id="stat-daylight">–</span>
+        <span class="stat-sub" id="stat-daylight-sub"></span>
       </div>
     </section>
 
     <section class="chart-card compare-card" aria-labelledby="compare-title">
-      <h2 id="compare-title">Träning och dagsljus</h2>
-      <p class="chart-sub">Snitt för dagar med och utan aktiviteten. Sömnen gäller natten efter.</p>
+      <h2 id="compare-title">Humör med och utan</h2>
+      <p class="chart-sub">Snitthumör på dagar med och utan träning eller dagsljus</p>
       <div id="compare"></div>
       <p class="compare-note">Visar hur värdena hänger ihop, inte vad som orsakar vad.</p>
     </section>
 
-    <section class="chart-card" aria-labelledby="activity-title">
-      <h2 id="activity-title">Aktiviteter</h2>
-      <p class="chart-sub">Dagar du har tränat och varit ute i dagsljus</p>
-      <div class="chart" id="activity-chart"></div>
-      <ul class="legend chart-key">
-        <li><span class="swatch act-exercise"></span>🏃 Träning</li>
-        <li><span class="swatch act-daylight"></span>☀️ Dagsljus</li>
-      </ul>
+    <section class="chart-card" aria-labelledby="exercise-title">
+      <h2 id="exercise-title"><span class="swatch act-exercise"></span>Träning</h2>
+      <p class="chart-sub">Minuter per dag</p>
+      <div class="chart" id="exercise-chart"></div>
     </section>
 
-    <section class="chart-card" aria-labelledby="sleep-title">
-      <h2 id="sleep-title"><span class="line-key series-sleep"></span>Sömn</h2>
-      <p class="chart-sub">Timmar natten mot dagen</p>
-      <div class="chart" id="sleep-chart"></div>
-    </section>
-
-    <section class="chart-card" aria-labelledby="energy-title">
-      <h2 id="energy-title"><span class="line-key series-energy"></span>Energi</h2>
-      <p class="chart-sub">Från 1 (låg) till 5 (hög)</p>
-      <div class="chart" id="energy-chart"></div>
+    <section class="chart-card" aria-labelledby="daylight-title">
+      <h2 id="daylight-title"><span class="swatch act-daylight"></span>Dagsljus</h2>
+      <p class="chart-sub">Minuter ute i dagsljus per dag</p>
+      <div class="chart" id="daylight-chart"></div>
     </section>
 
     <section class="chart-card" aria-labelledby="mood-title">
@@ -102,12 +87,9 @@
           <thead>
             <tr>
               <th scope="col">Datum</th>
-              <th scope="col">Sömn</th>
-              <th scope="col">Uppvak&shy;nanden</th>
-              <th scope="col">Energi</th>
-              <th scope="col">Humör</th>
               <th scope="col">Träning</th>
               <th scope="col">Dagsljus</th>
+              <th scope="col">Humör</th>
               <th scope="col">Markering</th>
             </tr>
           </thead>

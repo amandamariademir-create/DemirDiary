@@ -101,28 +101,17 @@
       </fieldset>
 
       <fieldset>
-        <legend>Energi</legend>
-        <div class="segmented" id="energy-options"></div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Sömn</legend>
-        <p class="field-hint">Natten mot den här dagen</p>
+        <legend>Aktiviteter</legend>
         <div class="field-row">
           <label class="field">
-            <span>Timmar</span>
-            <input type="number" id="sleep" min="0" max="24" step="0.5" inputmode="decimal">
+            <span>🏃 Träning (minuter)</span>
+            <input type="number" id="exercise" min="0" max="1440" step="1" inputmode="numeric">
           </label>
           <label class="field">
-            <span>Antal uppvaknanden</span>
-            <input type="number" id="wakeups" min="0" max="50" step="1" inputmode="numeric">
+            <span>☀️ Dagsljus (minuter)</span>
+            <input type="number" id="daylight" min="0" max="1440" step="1" inputmode="numeric">
           </label>
         </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Aktiviteter</legend>
-        <div class="segmented" id="activity-options"></div>
       </fieldset>
 
       <label class="field">

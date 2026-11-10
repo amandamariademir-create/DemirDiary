@@ -193,7 +193,11 @@ function describeDay(key, entry, predicted, predictedOvulation) {
   const parts = [formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' })];
   if (entry?.mark) parts.push(MARKS.find((m) => m.value === entry.mark).label.toLowerCase());
   if (entry?.mood) parts.push(`humör: ${MOODS.find((m) => m.value === entry.mood).label.toLowerCase()}`);
-  for (const a of ACTIVITIES) if (entry?.[a.key]) parts.push(a.label.toLowerCase());
+  for (const a of ACTIVITIES) {
+    if (!entry?.[a.key]) continue;
+    const m = minutesOf(entry, a.key);
+    parts.push(m ? `${a.label.toLowerCase()} ${formatMinutes(m)}` : a.label.toLowerCase());
+  }
   if (entry?.note) parts.push('har anteckning');
   if (predicted) parts.push('uppskattad mens');
   if (predictedOvulation) parts.push('uppskattad ägglossning');
@@ -231,8 +235,6 @@ function buildOption(type, name, value, text, title) {
 function buildForm() {
   $('mark-options').append(...MARKS.map((m) => buildOption('radio', 'mark', m.value, m.label)));
   $('mood-options').append(...MOODS.map((m) => buildOption('radio', 'mood', m.value, m.emoji, m.label)));
-  $('energy-options').append(...ENERGY.map((e) => buildOption('radio', 'energy', e, e, `Energi ${e} av 5`)));
-  $('activity-options').append(...ACTIVITIES.map((a) => buildOption('checkbox', a.key, 'on', `${a.emoji} ${a.label}`)));
 }
 
 function openDay(key) {
@@ -243,17 +245,20 @@ function openDay(key) {
   form.reset();
   form.querySelector(`input[name="mark"][value="${entry.mark || 'none'}"]`).checked = true;
   if (entry.mood) form.querySelector(`input[name="mood"][value="${entry.mood}"]`).checked = true;
-  if (entry.energy) form.querySelector(`input[name="energy"][value="${entry.energy}"]`).checked = true;
-  $('sleep').value = entry.sleep ?? '';
-  $('wakeups').value = entry.wakeups ?? '';
-  for (const a of ACTIVITIES) form.querySelector(`input[name="${a.key}"]`).checked = !!entry[a.key];
+  for (const a of ACTIVITIES) {
+    const input = $(a.key);
+    input.value = minutesOf(entry, a.key) ?? '';
+    // Från äldre version: dagen är markerad men tiden saknas. Den behålls tills du skriver in minuter.
+    input.dataset.legacy = entry[a.key] === true ? '1' : '';
+    input.placeholder = entry[a.key] === true ? 'Ja, tid saknas' : '';
+  }
   $('note').value = entry.note || '';
 
   dialog.showModal();
 }
 
-// Klick på ett redan valt humör/energi avmarkerar det.
-for (const name of ['mood', 'energy']) {
+// Klick på ett redan valt humör avmarkerar det.
+for (const name of ['mood']) {
   form.addEventListener('pointerdown', (e) => {
     const label = e.target.closest('label');
     const input = label?.querySelector(`input[name="${name}"]`);
@@ -273,10 +278,11 @@ form.addEventListener('submit', (e) => {
   const entry = sanitizeEntry({
     mark: data.get('mark'),
     mood: data.get('mood'),
-    energy: data.get('energy'),
-    sleep: $('sleep').value,
-    wakeups: $('wakeups').value,
-    ...Object.fromEntries(ACTIVITIES.map((a) => [a.key, data.get(a.key)])),
+    ...Object.fromEntries(ACTIVITIES.map((a) => {
+      const input = $(a.key);
+      const value = input.value.trim();
+      return [a.key, value === '' && input.dataset.legacy === '1' ? true : value];
+    })),
     note: $('note').value,
   });
   if (entry) entries[currentKey] = entry;
