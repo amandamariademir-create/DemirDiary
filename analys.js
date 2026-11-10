@@ -88,20 +88,19 @@ function el(tag, className, text) {
 }
 
 /* ---------- Jämförelse: sömn efter dagar med och utan aktivitet ---------- */
+// Uppvaknanden jämförs inte: de beror på att man blir väckt, inte på aktiviteterna.
 
 // Sömnen som fylls i på en dag gäller natten mot den dagen. En aktivitet
 // jämförs därför med sömnen som är ifylld dagen efter.
 function compareActivity(activity) {
   const { start, end } = rangeBounds();
-  const groups = { sleep: { with: [], without: [] }, wakeups: { with: [], without: [] } };
+  const groups = { sleep: { with: [], without: [] } };
   for (let d = start; d < end; d++) {
     const e = entryFor(d);
     if (!e) continue; // en dag utan något ifyllt räknas varken som med eller utan
     const group = e[activity.key] ? 'with' : 'without';
     const next = entryFor(d + 1);
-    for (const field of ['sleep', 'wakeups']) {
-      if (typeof next?.[field] === 'number') groups[field][group].push(next[field]);
-    }
+    if (typeof next?.sleep === 'number') groups.sleep[group].push(next.sleep);
   }
   return groups;
 }
@@ -116,7 +115,6 @@ function renderCompare() {
   root.replaceChildren();
   const metrics = [
     { key: 'sleep', label: 'Sömn natten efter', max: (vals) => Math.max(10, ...vals), format: formatSleep, diff: (d) => signed(d, ' h') },
-    { key: 'wakeups', label: 'Uppvaknanden natten efter', max: (vals) => Math.max(3, ...vals), format: (v) => formatNumber(v), diff: (d) => signed(d) },
   ];
 
   for (const activity of ACTIVITIES) {

@@ -1,7 +1,7 @@
 'use strict';
 
 // Höj versionen när filerna ändras så att gamla cachen rensas.
-const CACHE = 'demirdiary-v9';
+const CACHE = 'demirdiary-v10';
 const FILES = [
   './',
   './index.html',
