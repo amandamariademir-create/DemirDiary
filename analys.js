@@ -5,6 +5,8 @@
 const entries = loadEntries();
 const RANGE_KEY = 'demirdiary.analysRange';
 const SVG_NS = 'http://www.w3.org/2000/svg';
+const MAX_GAP = 3; // dagar mellan två värden som fortfarande binds ihop med en linje
+const MIN_COMPARE_DAYS = 3; // minsta antal nätter i varje grupp för att jämföra
 
 const state = {
   days: readRange(),
@@ -32,6 +34,7 @@ function rangeBounds() {
 const entryFor = (dayNum) => entries[dayNumToKey(dayNum)];
 const formatNumber = (n, digits = 1) => n.toLocaleString('sv-SE', { maximumFractionDigits: digits, minimumFractionDigits: 0 });
 const average = (list) => list.reduce((a, b) => a + b, 0) / list.length;
+const formatSleep = (h) => `${formatNumber(h)} h`;
 const activityText = (entry, key) => {
   const m = minutesOf(entry, key);
   if (m) return formatMinutes(m);
@@ -51,6 +54,14 @@ function collect(field) {
 /* ---------- Sammanfattning ---------- */
 
 function renderStats() {
+  for (const [field, format] of [['sleep', formatSleep], ['wakeups', (v) => formatNumber(v)]]) {
+    const points = collect(field);
+    $(`stat-${field}`).textContent = points.length ? format(average(points.map((p) => p.value))) : '–';
+    $(`stat-${field}-sub`).textContent = points.length
+      ? `snitt av ${points.length} ${points.length === 1 ? 'natt' : 'nätter'}`
+      : 'inget ifyllt ännu';
+  }
+
   const { start, end } = rangeBounds();
   for (const a of ACTIVITIES) {
     let days = 0;
@@ -74,6 +85,79 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+/* ---------- Jämförelse: sömn efter dagar med och utan aktivitet ---------- */
+
+// Sömnen som fylls i på en dag gäller natten mot den dagen. En aktivitet
+// jämförs därför med sömnen som är ifylld dagen efter.
+function compareActivity(activity) {
+  const { start, end } = rangeBounds();
+  const groups = { sleep: { with: [], without: [] }, wakeups: { with: [], without: [] } };
+  for (let d = start; d < end; d++) {
+    const e = entryFor(d);
+    if (!e) continue; // en dag utan något ifyllt räknas varken som med eller utan
+    const group = e[activity.key] ? 'with' : 'without';
+    const next = entryFor(d + 1);
+    for (const field of ['sleep', 'wakeups']) {
+      if (typeof next?.[field] === 'number') groups[field][group].push(next[field]);
+    }
+  }
+  return groups;
+}
+
+const signed = (d, suffix = '') => {
+  const r = Math.round(d * 10) / 10; // samma avrundning som visas, så att det inte står "+0"
+  return `${r > 0 ? '+' : r < 0 ? '−' : '±'}${formatNumber(Math.abs(r))}${suffix}`;
+};
+
+function renderCompare() {
+  const root = $('compare');
+  root.replaceChildren();
+  const metrics = [
+    { key: 'sleep', label: 'Sömn natten efter', max: (vals) => Math.max(10, ...vals), format: formatSleep, diff: (d) => signed(d, ' h') },
+    { key: 'wakeups', label: 'Uppvaknanden natten efter', max: (vals) => Math.max(3, ...vals), format: (v) => formatNumber(v), diff: (d) => signed(d) },
+  ];
+
+  for (const activity of ACTIVITIES) {
+    const groups = compareActivity(activity);
+    const block = el('div', 'compare-block');
+    const head = el('div', 'compare-head');
+    head.append(el('h3', '', `${activity.emoji} ${activity.label}`));
+    block.append(head);
+
+    for (const m of metrics) {
+      const g = groups[m.key];
+      const metric = el('div', 'compare-metric');
+      metric.append(el('div', 'compare-label', m.label));
+      if (g.with.length < MIN_COMPARE_DAYS || g.without.length < MIN_COMPARE_DAYS) {
+        metric.append(el('p', 'compare-empty',
+          `Behöver minst ${MIN_COMPARE_DAYS} nätter efter dagar med och ${MIN_COMPARE_DAYS} utan ${activity.label.toLowerCase()} (nu ${g.with.length} och ${g.without.length}).`));
+        block.append(metric);
+        continue;
+      }
+      const withAvg = average(g.with);
+      const withoutAvg = average(g.without);
+      const max = m.max([withAvg, withoutAvg]);
+      for (const r of [
+        { name: `Med ${activity.label.toLowerCase()}`, value: withAvg, n: g.with.length, cls: 'series-sleep' },
+        { name: 'Utan', value: withoutAvg, n: g.without.length, cls: 'bar-neutral' },
+      ]) {
+        const row = el('div', 'bar-row');
+        row.setAttribute('role', 'img');
+        row.setAttribute('aria-label', `${r.name}: ${m.format(r.value)}, snitt av ${r.n} nätter`);
+        const track = el('span', 'bar-track');
+        const bar = el('span', `bar ${r.cls}`);
+        bar.style.width = `${Math.max(2, (r.value / max) * 100)}%`;
+        track.append(bar);
+        row.append(el('span', 'bar-name', r.name), track, el('span', 'bar-value', m.format(r.value)), el('span', 'bar-n', `${r.n} n`));
+        metric.append(row);
+      }
+      metric.append(el('div', 'compare-diff', `Skillnad ${m.diff(withAvg - withoutAvg)}`));
+      block.append(metric);
+    }
+    root.append(block);
+  }
 }
 
 /* ---------- Grafer ---------- */
@@ -117,6 +201,35 @@ function drawYGrid(root, geom, config) {
     label.textContent = config.yLabel(t);
   }
   svg('line', { x1: pad.left, x2: width - pad.right, y1: pad.top + plotH, y2: pad.top + plotH, class: 'axis' }, root);
+}
+
+function drawLine(root, geom, config) {
+  const { x, y, points } = geom;
+  drawYGrid(root, geom, config);
+
+  // Linje: binds ihop när det är högst MAX_GAP dagar mellan värdena
+  let d = '';
+  const isolated = [];
+  points.forEach((p, i) => {
+    const prev = points[i - 1];
+    const next = points[i + 1];
+    const joinPrev = prev && p.day - prev.day <= MAX_GAP;
+    const joinNext = next && next.day - p.day <= MAX_GAP;
+    d += `${joinPrev ? 'L' : 'M'}${x(p.day).toFixed(1)},${y(p.value).toFixed(1)}`;
+    if (!joinPrev && !joinNext) isolated.push(p);
+  });
+  if (d) svg('path', { d, class: `line ${config.seriesClass}` }, root);
+  for (const p of isolated) {
+    svg('circle', { cx: x(p.day), cy: y(p.value), r: 4, class: `dot ${config.seriesClass}` }, root);
+  }
+
+  // Senaste värdet markeras och skrivs ut vid slutet av linjen
+  const last = points[points.length - 1];
+  if (last) {
+    svg('circle', { cx: x(last.day), cy: y(last.value), r: 4, class: `dot ${config.seriesClass}` }, root);
+    const label = svg('text', { x: x(last.day) + 8, y: y(last.value), class: 'end-label' }, root);
+    label.textContent = config.endLabel(last.value);
+  }
 }
 
 // Stapel med rundade hörn upptill och rak kant mot nollinjen.
@@ -197,7 +310,8 @@ function createChart(container, config) {
       }, root);
     }
 
-    drawBars(root, geom, config);
+    if (config.kind === 'line') drawLine(root, geom, config);
+    else drawBars(root, geom, config);
 
     for (const t of xTicks(start, end, x)) {
       const label = svg('text', { x: x(t.day), y: height - 6, class: 'tick tick-x' }, root);
@@ -254,6 +368,10 @@ function createChart(container, config) {
 
     const cx = geom.x(day);
     svg('line', { x1: cx, x2: cx, y1: geom.pad.top, y2: geom.pad.top + geom.plotH, class: 'crosshair' }, layer);
+    if (config.kind === 'line') {
+      const value = entryFor(day)?.[config.field];
+      if (typeof value === 'number') svg('circle', { cx, cy: geom.y(value), r: 5, class: `dot ${config.seriesClass}` }, layer);
+    }
 
     if (state.activeChart !== chart) return;
     fillTooltip(tooltip, day);
@@ -286,6 +404,8 @@ function fillTooltip(box, day) {
     box.append(r);
   };
 
+  row('line-key series-sleep', typeof e.sleep === 'number' ? formatSleep(e.sleep) : '–', 'sömn');
+  if (typeof e.wakeups === 'number') row('line-key no-key', String(e.wakeups), e.wakeups === 1 ? 'uppvaknande' : 'uppvaknanden');
   for (const a of ACTIVITIES) row(`rect-key act-${a.key}`, activityText(e, a.key), a.label.toLowerCase());
 
   if (e.mark) box.append(el('div', 'tooltip-mark', e.mark === 'period' ? 'Mens' : 'Ägglossning'));
@@ -313,7 +433,31 @@ function buildActivityChart(a) {
   });
 }
 
-const charts = ACTIVITIES.map(buildActivityChart);
+const charts = [
+  createChart($('sleep-chart'), {
+    kind: 'line',
+    field: 'sleep',
+    seriesClass: 'series-sleep',
+    height: 200,
+    domain: (points) => {
+      const max = Math.max(10, ...points.map((p) => p.value));
+      return [0, Math.ceil(max / 2) * 2];
+    },
+    yTicks: (min, max) => {
+      const ticks = [];
+      for (let t = min; t <= max; t += max > 12 ? 4 : 2) ticks.push(t);
+      return ticks;
+    },
+    yLabel: (t) => String(t),
+    endLabel: (v) => formatSleep(v),
+    isEmpty: (points) => !points.length,
+    emptyText: 'Ingen sömn ifylld under perioden',
+    describe: (points) => points.length
+      ? `Sömn i timmar per natt, ${points.length} nätter. Använd piltangenterna för att gå mellan dagarna.`
+      : 'Sömn: inga värden under perioden.',
+  }),
+  ...ACTIVITIES.map(buildActivityChart),
+];
 
 function setHover(day, chart) {
   state.hoverDay = day;
@@ -334,6 +478,8 @@ function renderTable() {
     const tr = document.createElement('tr');
     const cells = [
       formatDayNum(d, { weekday: 'short', day: 'numeric', month: 'short' }),
+      typeof e.sleep === 'number' ? formatSleep(e.sleep) : '–',
+      typeof e.wakeups === 'number' ? String(e.wakeups) : '–',
       ...ACTIVITIES.map((a) => activityText(e, a.key)),
       e.mark === 'period' ? 'Mens' : e.mark === 'ovulation' ? 'Ägglossning' : '',
     ];
@@ -358,6 +504,7 @@ function renderAll() {
   state.hoverDay = null;
   state.activeChart = null;
   renderStats();
+  renderCompare();
   for (const c of charts) c.render();
   renderTable();
 }

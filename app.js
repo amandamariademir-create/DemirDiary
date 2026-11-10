@@ -188,6 +188,7 @@ function renderCalendar(cycle) {
 
 function describeDay(key, entry, predicted, predictedOvulation) {
   const parts = [formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' })];
+  if (typeof entry?.sleep === 'number') parts.push(`sömn ${String(entry.sleep).replace('.', ',')} timmar`);
   if (entry?.mark) parts.push(MARKS.find((m) => m.value === entry.mark).label.toLowerCase());
   for (const a of ACTIVITIES) {
     if (!entry?.[a.key]) continue;
@@ -239,6 +240,8 @@ function openDay(key) {
 
   form.reset();
   form.querySelector(`input[name="mark"][value="${entry.mark || 'none'}"]`).checked = true;
+  $('sleep').value = entry.sleep ?? '';
+  $('wakeups').value = entry.wakeups ?? '';
   for (const a of ACTIVITIES) {
     const input = $(a.key);
     input.value = minutesOf(entry, a.key) ?? '';
@@ -256,6 +259,8 @@ form.addEventListener('submit', (e) => {
   const data = new FormData(form);
   const entry = sanitizeEntry({
     mark: data.get('mark'),
+    sleep: $('sleep').value,
+    wakeups: $('wakeups').value,
     ...Object.fromEntries(ACTIVITIES.map((a) => {
       const input = $(a.key);
       const value = input.value.trim();

@@ -58,6 +58,14 @@ function sanitizeEntry(raw) {
   const entry = {};
   const mark = raw.mark ?? (LEGACY_PERIOD_FLOWS.has(raw.flow) ? 'period' : undefined);
   if (mark === 'period' || mark === 'ovulation') entry.mark = mark;
+  const sleep = Number(raw.sleep);
+  if (raw.sleep !== null && raw.sleep !== '' && raw.sleep !== undefined && Number.isFinite(sleep) && sleep >= 0 && sleep <= 24) {
+    entry.sleep = sleep;
+  }
+  const wakeups = Number(raw.wakeups);
+  if (raw.wakeups !== null && raw.wakeups !== '' && raw.wakeups !== undefined && Number.isInteger(wakeups) && wakeups >= 0 && wakeups <= 50) {
+    entry.wakeups = wakeups;
+  }
   // Träning och dagsljus sparas i minuter. "true" kommer från en äldre version
   // där man bara markerade ja/nej, och betyder att tiden saknas.
   for (const a of ACTIVITIES) {

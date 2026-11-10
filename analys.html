@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#c0304e">
   <title>DemirDiary – Analys</title>
-  <meta name="description" content="Träning och dagsljus över tid.">
+  <meta name="description" content="Sömn, träning och dagsljus över tid.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <header class="app-header">
@@ -34,6 +34,16 @@
 
     <section class="stats stats-two" aria-label="Sammanfattning för perioden">
       <div class="stat">
+        <span class="stat-label">Sömn</span>
+        <span class="stat-value" id="stat-sleep">–</span>
+        <span class="stat-sub" id="stat-sleep-sub"></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Uppvaknanden</span>
+        <span class="stat-value" id="stat-wakeups">–</span>
+        <span class="stat-sub" id="stat-wakeups-sub"></span>
+      </div>
+      <div class="stat">
         <span class="stat-label">🏃 Träning</span>
         <span class="stat-value" id="stat-exercise">–</span>
         <span class="stat-sub" id="stat-exercise-sub"></span>
@@ -43,6 +53,19 @@
         <span class="stat-value" id="stat-daylight">–</span>
         <span class="stat-sub" id="stat-daylight-sub"></span>
       </div>
+    </section>
+
+    <section class="chart-card compare-card" aria-labelledby="compare-title">
+      <h2 id="compare-title">Sömn efter träning och dagsljus</h2>
+      <p class="chart-sub">Snitt för nätterna efter dagar med och utan aktiviteten</p>
+      <div id="compare"></div>
+      <p class="compare-note">Visar hur värdena hänger ihop, inte vad som orsakar vad.</p>
+    </section>
+
+    <section class="chart-card" aria-labelledby="sleep-title">
+      <h2 id="sleep-title"><span class="line-key series-sleep"></span>Sömn</h2>
+      <p class="chart-sub">Timmar natten mot dagen</p>
+      <div class="chart" id="sleep-chart"></div>
     </section>
 
     <section class="chart-card" aria-labelledby="exercise-title">
@@ -69,6 +92,8 @@
           <thead>
             <tr>
               <th scope="col">Datum</th>
+              <th scope="col">Sömn</th>
+              <th scope="col">Uppvak&shy;nanden</th>
               <th scope="col">Träning</th>
               <th scope="col">Dagsljus</th>
               <th scope="col">Markering</th>
@@ -81,7 +106,7 @@
     </details>
   </main>
 
-  <script src="common.js?v=6"></script>
-  <script src="analys.js?v=6"></script>
+  <script src="common.js?v=7"></script>
+  <script src="analys.js?v=7"></script>
 </body>
 </html>

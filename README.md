@@ -5,9 +5,9 @@ En personlig hälsodagbok för att följa menscykel och mående dag för dag.
 ## Funktioner
 
 - **Månadskalender** där mensdagar och ägglossning färgas och dagar med träning (🏃) och dagsljus (☀️) markeras.
-- **Dagsformulär** där du markerar mens eller ägglossning och fyller i minuter träning, minuter i dagsljus och en fri anteckning.
+- **Dagsformulär** där du markerar mens eller ägglossning och fyller i sömn (timmar och antal uppvaknanden), minuter träning, minuter i dagsljus och en fri anteckning.
 - **Översikt** med cykeldag, snittlängd på cykel och mens, och uppskattning av nästa mens och ägglossning. Kommande mensdagar och ägglossning markeras med streckad ram i kalendern.
-- **Analys** (`analys.html`): stapeldiagram över minuter träning och minuter dagsljus per dag för de senaste 30 dagarna, 3 månaderna, 6 månaderna eller året, med mens- och ägglossningsdagar som bakgrund. Peka på en dag för att se värdena, eller öppna tabellen.
+- **Analys** (`analys.html`): jämförelse av sömn och uppvaknanden natten efter dagar med och utan träning eller dagsljus, en linjegraf över sömn och stapeldiagram över minuter träning och dagsljus för de senaste 30 dagarna, 3 månaderna, 6 månaderna eller året, med mens- och ägglossningsdagar som bakgrund. Peka på en dag för att se värdena, eller öppna tabellen.
 - **Säkerhetskopia**: exportera och importera dina uppgifter som en JSON-fil.
 
 ## Var sparas uppgifterna?
@@ -51,6 +51,6 @@ När du ändrar i koden: höj versionen i `CACHE` i `sw.js` och siffran efter `?
 - Innan det finns två registrerade menstillfällen antas en cykel på 28 dagar.
 - Ägglossningen uppskattas till 14 dagar före nästa väntade mens. Har du själv markerat ägglossning inom fem dagar från den dagen visas ingen uppskattning för den cykeln.
 
-Dagar som markerades med bara ja/nej för träning eller dagsljus i en äldre version räknas som dagar med aktiviteten, men tiden saknas. De visas som en låg grå stapel i analysen.
+Sömnen som fylls i på en dag gäller natten mot den dagen. På analyssidan jämförs därför en aktivitet med sömnen och uppvaknandena som är ifyllda dagen efter. Dagar där inget alls är ifyllt räknas varken som med eller utan aktiviteten. Dagar som markerades med bara ja/nej för träning eller dagsljus i en äldre version räknas som dagar med aktiviteten, men tiden saknas.
 
 Uppskattningen är inte ett medicinskt råd och ska inte användas som preventivmedel.

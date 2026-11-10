@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <header class="app-header">
@@ -96,6 +96,21 @@
       </fieldset>
 
       <fieldset>
+        <legend>Sömn</legend>
+        <p class="field-hint">Natten mot den här dagen</p>
+        <div class="field-row">
+          <label class="field">
+            <span>Timmar</span>
+            <input type="number" id="sleep" min="0" max="24" step="0.5" inputmode="decimal">
+          </label>
+          <label class="field">
+            <span>Antal uppvaknanden</span>
+            <input type="number" id="wakeups" min="0" max="50" step="1" inputmode="numeric">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
         <legend>Aktiviteter</legend>
         <div class="field-row">
           <label class="field">
@@ -125,7 +140,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="common.js?v=6"></script>
-  <script src="app.js?v=6"></script>
+  <script src="common.js?v=7"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

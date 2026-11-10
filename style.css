@@ -17,6 +17,7 @@
   /* Grafer */
   --act-exercise: #6250d6;
   --act-daylight: #eda100;
+  --series-sleep: #2a78d6;
   --bar-neutral: #c9bcc1;
   --grid: #efe6e9;
   --axis: #d6c8cd;
@@ -44,6 +45,7 @@
     --shadow: none;
     --act-exercise: #9085e9;
     --act-daylight: #c98500;
+    --series-sleep: #3987e5;
     --bar-neutral: #5a4c52;
     --grid: #33292d;
     --axis: #4a3c42;
@@ -291,6 +293,7 @@ legend, .field > span {
   font: inherit;
 }
 .field input { max-width: 120px; }
+.field-hint { margin: -4px 0 6px; font-size: 0.8rem; color: var(--muted); }
 .field-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .field-row .field > span { font-weight: 400; margin-bottom: 4px; }
 
@@ -389,12 +392,20 @@ legend, .field > span {
 .chart-svg .act-exercise { fill: var(--act-exercise); }
 .chart-svg .act-daylight { fill: var(--act-daylight); }
 .chart-svg .bar-unknown { fill: var(--bar-neutral); }
+.chart-svg .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart-svg .line.series-sleep { stroke: var(--series-sleep); }
+.chart-svg .dot { stroke: var(--surface); stroke-width: 2; }
+.chart-svg .dot.series-sleep { fill: var(--series-sleep); }
+.chart-svg .end-label { fill: var(--text); font-size: 12px; font-weight: 600; dominant-baseline: middle; }
 .chart-svg .empty-label { fill: var(--muted); font-size: 13px; text-anchor: middle; dominant-baseline: middle; }
 .chart-svg .band-period { fill: var(--band-period); }
 .chart-svg .band-ovulation { fill: var(--band-ovulation); }
 .chart-svg .crosshair { stroke: var(--muted); stroke-width: 1; }
 .chart-svg .hit { fill: transparent; cursor: crosshair; }
 
+.line-key { display: inline-block; width: 14px; height: 2px; border-radius: 1px; flex: none; }
+.line-key.series-sleep { background: var(--series-sleep); }
+.line-key.no-key { background: transparent; }
 .rect-key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; flex: none; }
 .rect-key.act-exercise { background: var(--act-exercise); }
 .rect-key.act-daylight { background: var(--act-daylight); }
@@ -447,3 +458,31 @@ legend, .field > span {
 .table-view tbody th { font-weight: 500; }
 .table-view td:nth-child(2), .table-view td:nth-child(3) { font-variant-numeric: tabular-nums; }
 .table-empty { color: var(--muted); font-size: 0.9rem; }
+
+/* Jämförelse: sömn med och utan aktivitet */
+.compare-card { padding-bottom: 12px; }
+.compare-block { padding: 12px 4px 0; }
+.compare-block + .compare-block { border-top: 1px solid var(--grid); margin-top: 12px; }
+.compare-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.compare-head h3 { margin: 0; font-size: 1rem; }
+.compare-head span { font-size: 0.8rem; color: var(--muted); }
+.compare-metric { margin-top: 10px; }
+.compare-label { font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+.compare-empty { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.bar-row {
+  display: grid;
+  grid-template-columns: 7.5em 1fr 3.4em 2.4em;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  margin: 3px 0;
+}
+.bar-name { overflow-wrap: anywhere; }
+.bar-track { display: block; height: 12px; }
+.bar { display: block; height: 12px; border-radius: 0 4px 4px 0; }
+.bar.series-sleep { background: var(--series-sleep); }
+.bar.bar-neutral { background: var(--bar-neutral); }
+.bar-value { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.bar-n { color: var(--muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.compare-diff { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+.compare-note { margin: 12px 4px 0; font-size: 0.8rem; color: var(--muted); }
