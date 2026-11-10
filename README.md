@@ -7,6 +7,7 @@ En personlig hälsodagbok för att följa menscykel och mående dag för dag.
 - **Månadskalender** där mensdagar och ägglossning färgas och humöret visas som en emoji.
 - **Dagsformulär** där du markerar mens eller ägglossning och fyller i humör, energi, sömn (timmar och antal uppvaknanden) och en fri anteckning.
 - **Översikt** med cykeldag, snittlängd på cykel och mens, och uppskattning av nästa mens och ägglossning. Kommande mensdagar och ägglossning markeras med streckad ram i kalendern.
+- **Analys** (`analys.html`): grafer över sömn och humör för de senaste 30 dagarna, 3 månaderna, 6 månaderna eller året, med mens- och ägglossningsdagar som bakgrund. Peka på en dag för att se alla värden, eller öppna tabellen.
 - **Säkerhetskopia**: exportera och importera dina uppgifter som en JSON-fil.
 
 ## Var sparas uppgifterna?

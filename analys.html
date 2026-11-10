@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#c0304e">
+  <title>DemirDiary – Analys</title>
+  <meta name="description" content="Sömn och mående över tid.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DemirDiary">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>🌸 DemirDiary</h1>
+    <nav class="app-nav" aria-label="Sidor">
+      <a href="./">Kalender</a>
+      <a href="analys.html" aria-current="page">Analys</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="range-filter" role="group" aria-label="Tidsperiod" id="range-filter">
+      <button type="button" data-days="30">30 dagar</button>
+      <button type="button" data-days="90">3 månader</button>
+      <button type="button" data-days="182">6 månader</button>
+      <button type="button" data-days="365">1 år</button>
+    </div>
+
+    <section class="stats stats-three" aria-label="Snittvärden för perioden">
+      <div class="stat">
+        <span class="stat-label">Sömn</span>
+        <span class="stat-value" id="avg-sleep">–</span>
+        <span class="stat-sub" id="avg-sleep-sub"></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Humör</span>
+        <span class="stat-value" id="avg-mood">–</span>
+        <span class="stat-sub" id="avg-mood-sub"></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Uppvaknanden</span>
+        <span class="stat-value" id="avg-wakeups">–</span>
+        <span class="stat-sub" id="avg-wakeups-sub"></span>
+      </div>
+    </section>
+
+    <section class="chart-card" aria-labelledby="sleep-title">
+      <h2 id="sleep-title"><span class="line-key series-sleep"></span>Sömn</h2>
+      <p class="chart-sub">Timmar per natt</p>
+      <div class="chart" id="sleep-chart"></div>
+    </section>
+
+    <section class="chart-card" aria-labelledby="mood-title">
+      <h2 id="mood-title"><span class="line-key series-mood"></span>Humör</h2>
+      <p class="chart-sub">Från 😢 mycket dåligt till 😄 mycket bra</p>
+      <div class="chart" id="mood-chart"></div>
+    </section>
+
+    <ul class="legend chart-legend" aria-label="Bakgrund i graferna">
+      <li><span class="swatch band-period"></span>Mens</li>
+      <li><span class="swatch band-ovulation"></span>Ägglossning</li>
+    </ul>
+
+    <details class="table-view">
+      <summary>Visa som tabell</summary>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th scope="col">Datum</th><th scope="col">Sömn</th><th scope="col">Uppvak&shy;nanden</th><th scope="col">Humör</th><th scope="col">Markering</th></tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <p class="table-empty" id="table-empty" hidden>Inga ifyllda dagar under perioden.</p>
+    </details>
+  </main>
+
+  <script src="common.js"></script>
+  <script src="analys.js"></script>
+</body>
+</html>
