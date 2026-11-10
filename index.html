@@ -68,6 +68,8 @@
         <li><span class="swatch mark-ovulation"></span>Ägglossning</li>
         <li><span class="swatch predicted"></span>Uppskattad mens</li>
         <li><span class="swatch predicted-ovulation"></span>Uppskattad ägglossning</li>
+        <li><span aria-hidden="true">🏃</span>Träning</li>
+        <li><span aria-hidden="true">☀️</span>Dagsljus</li>
       </ul>
     </section>
 
@@ -105,6 +107,7 @@
 
       <fieldset>
         <legend>Sömn</legend>
+        <p class="field-hint">Natten mot den här dagen</p>
         <div class="field-row">
           <label class="field">
             <span>Timmar</span>
@@ -115,6 +118,11 @@
             <input type="number" id="wakeups" min="0" max="50" step="1" inputmode="numeric">
           </label>
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Aktiviteter</legend>
+        <div class="segmented" id="activity-options"></div>
       </fieldset>
 
       <label class="field">

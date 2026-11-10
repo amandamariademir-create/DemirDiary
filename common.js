@@ -28,6 +28,11 @@ const MOODS = [
 
 const ENERGY = [1, 2, 3, 4, 5];
 
+const ACTIVITIES = [
+  { key: 'exercise', label: 'Träning', emoji: '🏃' },
+  { key: 'daylight', label: 'Dagsljus', emoji: '☀️' },
+];
+
 /* ---------- Datum ---------- */
 
 const DAY_MS = 86400000;
@@ -70,6 +75,9 @@ function sanitizeEntry(raw) {
   const wakeups = Number(raw.wakeups);
   if (raw.wakeups !== null && raw.wakeups !== '' && raw.wakeups !== undefined && Number.isInteger(wakeups) && wakeups >= 0 && wakeups <= 50) {
     entry.wakeups = wakeups;
+  }
+  for (const a of ACTIVITIES) {
+    if (raw[a.key] === true || raw[a.key] === 'on') entry[a.key] = true;
   }
   if (typeof raw.note === 'string' && raw.note.trim()) entry.note = raw.note.slice(0, 2000);
   return Object.keys(entry).length ? entry : null;
