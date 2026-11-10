@@ -389,6 +389,9 @@ legend, .field > span {
 .chart-svg .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .chart-svg .tick-y { text-anchor: end; dominant-baseline: middle; }
 .chart-svg .tick-x { text-anchor: middle; }
+.chart-svg .tick-y-right { text-anchor: start; dominant-baseline: middle; }
+.chart-svg .axis-title { fill: var(--muted); font-size: 11px; font-weight: 600; }
+.chart-svg .axis-title-right { text-anchor: end; }
 .chart-svg .act-exercise { fill: var(--act-exercise); }
 .chart-svg .act-daylight { fill: var(--act-daylight); }
 .chart-svg .bar-unknown { fill: var(--bar-neutral); }
@@ -396,7 +399,6 @@ legend, .field > span {
 .chart-svg .line.series-sleep { stroke: var(--series-sleep); }
 .chart-svg .dot { stroke: var(--surface); stroke-width: 2; }
 .chart-svg .dot.series-sleep { fill: var(--series-sleep); }
-.chart-svg .end-label { fill: var(--text); font-size: 12px; font-weight: 600; dominant-baseline: middle; }
 .chart-svg .empty-label { fill: var(--muted); font-size: 13px; text-anchor: middle; dominant-baseline: middle; }
 .chart-svg .band-period { fill: var(--band-period); }
 .chart-svg .band-ovulation { fill: var(--band-ovulation); }

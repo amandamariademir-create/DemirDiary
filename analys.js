@@ -193,14 +193,23 @@ function xTicks(start, end, x) {
   return ticks;
 }
 
+// Vänster skala: sömn i timmar. Höger skala: träning och dagsljus i minuter.
+// Höger skalas siffror hamnar på samma stödlinjer som vänster, och båda börjar på 0.
 function drawYGrid(root, geom, config) {
-  const { y, pad, width, plotH } = geom;
-  for (const t of config.yTicks(geom.yMin, geom.yMax)) {
+  const { y, pad, width, plotH, leftTicks, right } = geom;
+  leftTicks.forEach((t, i) => {
     svg('line', { x1: pad.left, x2: width - pad.right, y1: y(t), y2: y(t), class: 'grid' }, root);
     const label = svg('text', { x: pad.left - 8, y: y(t), class: 'tick tick-y' }, root);
     label.textContent = config.yLabel(t);
-  }
+    const rightLabel = svg('text', { x: width - pad.right + 8, y: y(t), class: 'tick tick-y-right' }, root);
+    rightLabel.textContent = String(i * right.step);
+  });
   svg('line', { x1: pad.left, x2: width - pad.right, y1: pad.top + plotH, y2: pad.top + plotH, class: 'axis' }, root);
+
+  const leftTitle = svg('text', { x: 0, y: 10, class: 'axis-title' }, root);
+  leftTitle.textContent = config.leftTitle;
+  const rightTitle = svg('text', { x: width, y: 10, class: 'axis-title axis-title-right' }, root);
+  rightTitle.textContent = config.rightTitle;
 }
 
 function drawLine(root, geom, config) {
@@ -222,13 +231,9 @@ function drawLine(root, geom, config) {
     svg('circle', { cx: x(p.day), cy: y(p.value), r: 4, class: `dot ${config.seriesClass}` }, root);
   }
 
-  // Senaste värdet markeras och skrivs ut vid slutet av linjen
+  // Senaste värdet markeras med en prick
   const last = points[points.length - 1];
-  if (last) {
-    svg('circle', { cx: x(last.day), cy: y(last.value), r: 4, class: `dot ${config.seriesClass}` }, root);
-    const label = svg('text', { x: x(last.day) + 8, y: y(last.value), class: 'end-label' }, root);
-    label.textContent = config.endLabel(last.value);
-  }
+  if (last) svg('circle', { cx: x(last.day), cy: y(last.value), r: 4, class: `dot ${config.seriesClass}` }, root);
 }
 
 // Stapel med rundade hörn upptill och rak kant mot nollinjen.
@@ -239,7 +244,7 @@ function barPath(x0, x1, yTop, yBase) {
 
 // Träning och dagsljus som två staplar bredvid varandra för varje dag, i timmar.
 function drawActivityBars(root, geom) {
-  const { start, end, x, y, step, pad, plotH } = geom;
+  const { start, end, x, right, step, pad, plotH } = geom;
   const base = pad.top + plotH;
   const groupW = Math.max(1, Math.min(50, step - 2)); // luft mellan dagarna
   const gap = groupW >= 6 ? 2 : 0; // luft mellan de två staplarna samma dag
@@ -251,7 +256,7 @@ function drawActivityBars(root, geom) {
       const x0 = x(d) - groupW / 2 + i * (barW + gap);
       const m = minutesOf(e, a.key);
       if (m) {
-        svg('path', { d: barPath(x0, x0 + barW, y(m / 60), base), class: `bar-mark act-${a.key}` }, root);
+        svg('path', { d: barPath(x0, x0 + barW, right.y(m), base), class: `bar-mark act-${a.key}` }, root);
       } else if (e[a.key] === true) {
         // Dagen är markerad men tiden saknas: en låg grå stapel.
         svg('path', { d: barPath(x0, x0 + barW, base - 4, base), class: 'bar-unknown' }, root);
@@ -272,7 +277,7 @@ function createChart(container, config) {
     const points = collect(config.field);
     const width = Math.max(260, container.clientWidth);
     const height = config.height ?? 180;
-    const pad = { top: 12, right: 40, bottom: 26, left: 34 };
+    const pad = { top: 26, right: 34, bottom: 26, left: 30 };
     const plotW = width - pad.left - pad.right;
     const plotH = height - pad.top - pad.bottom;
     const n = end - start + 1;
@@ -280,7 +285,10 @@ function createChart(container, config) {
     const x = (d) => pad.left + (d - start + 0.5) * step;
     const [yMin, yMax] = config.domain(points);
     const y = (v) => pad.top + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
-    geom = { start, end, x, y, yMin, yMax, step, pad, width, height, plotH, points };
+    const leftTicks = config.yTicks(yMin, yMax);
+    const right = config.rightAxis(leftTicks.length - 1);
+    right.y = (v) => pad.top + plotH - (v / right.max) * plotH;
+    geom = { start, end, x, y, yMin, yMax, leftTicks, right, step, pad, width, height, plotH, points };
 
     const root = svg('svg', {
       viewBox: `0 0 ${width} ${height}`,
@@ -406,16 +414,25 @@ function fillTooltip(box, day) {
 }
 
 // Allt i samma graf och på samma skala (timmar), så att sömn och aktiviteter går att jämföra rakt av.
-function activityHoursInRange() {
+function activityMinutesInRange() {
   const { start, end } = rangeBounds();
-  const hours = [];
+  const minutes = [];
   for (let d = start; d <= end; d++) {
     for (const a of ACTIVITIES) {
       const m = minutesOf(entryFor(d), a.key);
-      if (m) hours.push(m / 60);
+      if (m) minutes.push(m);
     }
   }
-  return hours;
+  return minutes;
+}
+
+// Höger skala: väljer ett jämnt steg i minuter så att den högsta stapeln får plats
+// och skalans siffror hamnar på samma stödlinjer som sömnskalan.
+function minutesAxis(intervals) {
+  const max = Math.max(30, ...activityMinutesInRange());
+  const steps = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 360];
+  const step = steps.find((s) => s * intervals >= max) || Math.ceil(max / intervals / 60) * 60;
+  return { step, max: step * intervals };
 }
 
 const charts = [
@@ -424,7 +441,7 @@ const charts = [
     seriesClass: 'series-sleep',
     height: 220,
     domain: (points) => {
-      const max = Math.max(10, ...points.map((p) => p.value), ...activityHoursInRange());
+      const max = Math.max(10, ...points.map((p) => p.value));
       return [0, Math.ceil(max / 2) * 2];
     },
     yTicks: (min, max) => {
@@ -432,8 +449,10 @@ const charts = [
       for (let t = min; t <= max; t += max > 12 ? 4 : 2) ticks.push(t);
       return ticks;
     },
-    yLabel: (t) => `${t} h`,
-    endLabel: (v) => formatSleep(v),
+    yLabel: (t) => String(t),
+    rightAxis: minutesAxis,
+    leftTitle: 'Sömn, timmar',
+    rightTitle: 'Träning/dagsljus, min',
     isEmpty: (points) => {
       if (points.length) return false;
       const { start, end } = rangeBounds();
@@ -441,7 +460,7 @@ const charts = [
       return true;
     },
     emptyText: 'Ingen sömn, träning eller dagsljus ifylld under perioden',
-    describe: (points) => `Sömn som linje och träning och dagsljus som staplar, i timmar per dag. ${points.length} nätter med sömn. Använd piltangenterna för att gå mellan dagarna.`,
+    describe: (points) => `Sömn som linje i timmar (vänster skala), träning och dagsljus som staplar i minuter (höger skala). ${points.length} nätter med sömn. Använd piltangenterna för att gå mellan dagarna.`,
   }),
 ];
 

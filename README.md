@@ -7,7 +7,7 @@ En personlig hälsodagbok för att följa menscykel och mående dag för dag.
 - **Månadskalender** där mensdagar och ägglossning färgas och dagar med träning (🏃) och dagsljus (☀️) markeras.
 - **Dagsformulär** där du markerar mens eller ägglossning och fyller i sömn (timmar och antal uppvaknanden), minuter träning, minuter i dagsljus och en fri anteckning.
 - **Översikt** med cykeldag, snittlängd på cykel och mens, och uppskattning av nästa mens och ägglossning. Kommande mensdagar och ägglossning markeras med streckad ram i kalendern.
-- **Analys** (`analys.html`): jämförelse av sömn och uppvaknanden natten efter dagar med och utan träning eller dagsljus, och en graf där sömn (linje) och träning och dagsljus (staplar) visas tillsammans i timmar per dag, för de senaste 30 dagarna, 3 månaderna, 6 månaderna eller året, med mens- och ägglossningsdagar som bakgrund. Peka på en dag för att se värdena, eller öppna tabellen.
+- **Analys** (`analys.html`): jämförelse av sömn och uppvaknanden natten efter dagar med och utan träning eller dagsljus, och en graf där sömn (linje, timmar på vänster skala) och träning och dagsljus (staplar, minuter på höger skala) visas tillsammans, för de senaste 30 dagarna, 3 månaderna, 6 månaderna eller året, med mens- och ägglossningsdagar som bakgrund. Peka på en dag för att se värdena, eller öppna tabellen.
 - **Säkerhetskopia**: exportera och importera dina uppgifter som en JSON-fil.
 
 ## Var sparas uppgifterna?
