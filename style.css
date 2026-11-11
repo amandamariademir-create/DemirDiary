@@ -462,33 +462,6 @@ legend, .field > span {
 .table-view td:nth-child(2), .table-view td:nth-child(3) { font-variant-numeric: tabular-nums; }
 .table-empty { color: var(--muted); font-size: 0.9rem; }
 
-/* Jämförelse: sömn med och utan aktivitet */
-.compare-card { padding-bottom: 12px; }
-.compare-block { padding: 12px 4px 0; }
-.compare-block + .compare-block { border-top: 1px solid var(--grid); margin-top: 12px; }
-.compare-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.compare-head h3 { margin: 0; font-size: 1rem; }
-.compare-head span { font-size: 0.8rem; color: var(--muted); }
-.compare-metric { margin-top: 10px; }
-.compare-label { font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-.compare-empty { margin: 0; font-size: 0.85rem; color: var(--muted); }
-.bar-row {
-  display: grid;
-  grid-template-columns: 7.5em 1fr 3.4em 2.4em;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  margin: 3px 0;
-}
-.bar-name { overflow-wrap: anywhere; }
-.bar-track { display: block; height: 12px; }
-.bar { display: block; height: 12px; border-radius: 0 4px 4px 0; }
-.bar.series-sleep { background: var(--series-sleep); }
-.bar.bar-neutral { background: var(--bar-neutral); }
-.bar-value { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
-.bar-n { color: var(--muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
-.compare-diff { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-.compare-note { margin: 12px 4px 0; font-size: 0.8rem; color: var(--muted); }
 
 /* ---------- Idag: dagsljus och serier ---------- */
 

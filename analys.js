@@ -6,7 +6,6 @@ const entries = loadEntries();
 const RANGE_KEY = 'demirdiary.analysRange';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAX_GAP = 3; // dagar mellan två värden som fortfarande binds ihop med en linje
-const MIN_COMPARE_DAYS = 3; // minsta antal nätter i varje grupp för att jämföra
 
 const state = {
   days: readRange(),
@@ -85,77 +84,6 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
-}
-
-/* ---------- Jämförelse: sömn efter dagar med och utan aktivitet ---------- */
-// Uppvaknanden jämförs inte: de beror på att man blir väckt, inte på aktiviteterna.
-
-// Sömnen som fylls i på en dag gäller natten mot den dagen. En aktivitet
-// jämförs därför med sömnen som är ifylld dagen efter.
-function compareActivity(activity) {
-  const { start, end } = rangeBounds();
-  const groups = { sleep: { with: [], without: [] } };
-  for (let d = start; d < end; d++) {
-    const e = entryFor(d);
-    if (!e) continue; // en dag utan något ifyllt räknas varken som med eller utan
-    const group = e[activity.key] ? 'with' : 'without';
-    const next = entryFor(d + 1);
-    if (typeof next?.sleep === 'number') groups.sleep[group].push(next.sleep);
-  }
-  return groups;
-}
-
-const signed = (d, suffix = '') => {
-  const r = Math.round(d * 10) / 10; // samma avrundning som visas, så att det inte står "+0"
-  return `${r > 0 ? '+' : r < 0 ? '−' : '±'}${formatNumber(Math.abs(r))}${suffix}`;
-};
-
-function renderCompare() {
-  const root = $('compare');
-  root.replaceChildren();
-  const metrics = [
-    { key: 'sleep', label: 'Sömn natten efter', max: (vals) => Math.max(10, ...vals), format: formatSleep, diff: (d) => signed(d, ' h') },
-  ];
-
-  for (const activity of ACTIVITIES) {
-    const groups = compareActivity(activity);
-    const block = el('div', 'compare-block');
-    const head = el('div', 'compare-head');
-    head.append(el('h3', '', `${activity.emoji} ${activity.label}`));
-    block.append(head);
-
-    for (const m of metrics) {
-      const g = groups[m.key];
-      const metric = el('div', 'compare-metric');
-      metric.append(el('div', 'compare-label', m.label));
-      if (g.with.length < MIN_COMPARE_DAYS || g.without.length < MIN_COMPARE_DAYS) {
-        metric.append(el('p', 'compare-empty',
-          `Behöver minst ${MIN_COMPARE_DAYS} nätter efter dagar med och ${MIN_COMPARE_DAYS} utan ${activity.label.toLowerCase()} (nu ${g.with.length} och ${g.without.length}).`));
-        block.append(metric);
-        continue;
-      }
-      const withAvg = average(g.with);
-      const withoutAvg = average(g.without);
-      const max = m.max([withAvg, withoutAvg]);
-      for (const r of [
-        { name: `Med ${activity.label.toLowerCase()}`, value: withAvg, n: g.with.length, cls: 'series-sleep' },
-        { name: 'Utan', value: withoutAvg, n: g.without.length, cls: 'bar-neutral' },
-      ]) {
-        const row = el('div', 'bar-row');
-        row.setAttribute('role', 'img');
-        row.setAttribute('aria-label', `${r.name}: ${m.format(r.value)}, snitt av ${r.n} nätter`);
-        const track = el('span', 'bar-track');
-        const bar = el('span', `bar ${r.cls}`);
-        bar.style.width = `${Math.max(2, (r.value / max) * 100)}%`;
-        track.append(bar);
-        row.append(el('span', 'bar-name', r.name), track, el('span', 'bar-value', m.format(r.value)), el('span', 'bar-n', `${r.n} n`));
-        metric.append(row);
-      }
-      metric.append(el('div', 'compare-diff', `Skillnad ${m.diff(withAvg - withoutAvg)}`));
-      block.append(metric);
-    }
-    root.append(block);
-  }
 }
 
 /* ---------- Grafer ---------- */
@@ -507,7 +435,6 @@ function renderAll() {
   state.hoverDay = null;
   state.activeChart = null;
   renderStats();
-  renderCompare();
   for (const c of charts) c.render();
   renderTable();
 }
