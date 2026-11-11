@@ -4,9 +4,8 @@ En personlig hälsodagbok för att följa menscykel och mående dag för dag.
 
 ## Funktioner
 
-- **Idag** överst på kalendersidan:
-  - När solen går upp och ner där du är, hur mycket dagsljus som är kvar och ett tips om promenad. Tiderna räknas ut i appen (ingen internetuppkoppling behövs) och stämmer på ungefär ±3 minuter. Du väljer plats med din position eller en ort i listan; platsen sparas bara på enheten, avrundad till ungefär 10 km.
-  - Mjuka serier (streaks) för träning och dagsljus. En serie tål en vilodag och bryts först om du missar två dagar i rad. Dagens dag räknas inte som missad förrän den är slut.
+- **Idag** överst på kalendersidan: när solen går upp och ner där du är, hur mycket dagsljus som är kvar och ett tips om promenad. Tiderna räknas ut i appen (ingen internetuppkoppling behövs) och stämmer på ungefär ±3 minuter. Du väljer plats med din position eller en ort i listan; platsen sparas bara på enheten, avrundad till ungefär 10 km.
+- **Serier** överst på analyssidan: mjuka serier (streaks) för träning och dagsljus. En serie tål en vilodag och bryts först om du missar två dagar i rad. Dagens dag räknas inte som missad förrän den är slut.
 - **Månadskalender** där mensdagar och ägglossning färgas och dagar med träning (🏃) och dagsljus (☀️) markeras.
 - **Dagsformulär** där du markerar mens eller ägglossning och fyller i sömn (timmar och antal uppvaknanden), minuter träning, minuter i dagsljus och en fri anteckning.
 - **Översikt** med cykeldag, snittlängd på cykel och mens, och uppskattning av nästa mens och ägglossning. Kommande mensdagar och ägglossning markeras med streckad ram i kalendern.

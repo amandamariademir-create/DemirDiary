@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
   <header class="app-header">
@@ -25,6 +25,12 @@
   </header>
 
   <main>
+    <section class="streak-section" aria-labelledby="streak-title">
+      <h2 id="streak-title">Serier</h2>
+      <div class="streaks" id="streaks"></div>
+      <p class="streak-note">Serien tål en vilodag. Den bryts först om du missar två dagar i rad.</p>
+    </section>
+
     <div class="range-filter" role="group" aria-label="Tidsperiod" id="range-filter">
       <button type="button" data-days="30">30 dagar</button>
       <button type="button" data-days="90">3 månader</button>
@@ -89,7 +95,8 @@
     </details>
   </main>
 
-  <script src="common.js?v=12"></script>
-  <script src="analys.js?v=12"></script>
+  <script src="common.js?v=13"></script>
+  <script src="analys.js?v=13"></script>
+  <script src="streaks.js?v=13"></script>
 </body>
 </html>
