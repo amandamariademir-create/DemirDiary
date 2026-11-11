@@ -13,7 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
   <header class="app-header">
@@ -25,6 +25,39 @@
   </header>
 
   <main>
+    <section class="today-panel" aria-label="Idag">
+      <div class="sun-card" id="sun-card" hidden>
+        <div class="sun-top">
+          <span class="sun-icon" id="sun-icon" aria-hidden="true">☀️</span>
+          <div>
+            <p class="sun-main" id="sun-main"></p>
+            <p class="sun-sub" id="sun-sub"></p>
+          </div>
+        </div>
+        <div class="sun-bar" id="sun-bar" role="img">
+          <div class="sun-bar-track"><span class="sun-bar-fill" id="sun-bar-fill"></span></div>
+          <div class="sun-bar-labels"><span id="sun-bar-start"></span><span id="sun-bar-end"></span></div>
+        </div>
+        <p class="sun-logged" id="sun-logged" hidden></p>
+        <p class="sun-place"><span id="sun-place"></span> <button type="button" class="link-btn inline" id="sun-change">Byt plats</button></p>
+      </div>
+
+      <div class="sun-setup" id="sun-setup" hidden>
+        <p class="sun-setup-intro" id="sun-setup-intro">☀️ Välj var du är, så visar appen när solen går ner och hur mycket dagsljus som är kvar idag.</p>
+        <div class="sun-setup-row">
+          <button type="button" class="btn btn-secondary" id="sun-geo">📍 Använd min position</button>
+          <label class="field">
+            <span>Välj ort</span>
+            <select id="sun-city"><option value="">Välj ort…</option></select>
+          </label>
+        </div>
+        <p class="field-hint">Platsen sparas bara på den här enheten, avrundad till ungefär 10 km.</p>
+      </div>
+
+      <div class="streaks" id="streaks"></div>
+      <p class="streak-note">Serien tål en vilodag. Den bryts först om du missar två dagar i rad.</p>
+    </section>
+
     <section class="stats" aria-label="Översikt över cykeln">
       <div class="stat stat-wide">
         <span class="stat-label">Nästa mens</span>
@@ -140,7 +173,9 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="common.js?v=10"></script>
-  <script src="app.js?v=10"></script>
+  <script src="common.js?v=11"></script>
+  <script src="app.js?v=11"></script>
+  <script src="sun.js?v=11"></script>
+  <script src="today.js?v=11"></script>
 </body>
 </html>

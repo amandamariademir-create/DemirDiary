@@ -205,6 +205,7 @@ function render() {
   const cycle = computeCycle();
   renderStats(cycle);
   renderCalendar(cycle);
+  if (typeof renderToday === 'function') renderToday(); // från today.js
 }
 
 /* ---------- Dagsformulär ---------- */
