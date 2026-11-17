@@ -41,7 +41,7 @@ function renderStreaks() {
 
     const label = document.createElement('span');
     label.className = 'stat-label';
-    label.textContent = `${a.emoji} ${a.label} i serie`;
+    label.textContent = `${a.label} i serie`;
 
     const value = document.createElement('span');
     value.className = 'stat-value';
