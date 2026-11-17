@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#c0304e">
+  <meta name="theme-color" content="#f4f1eb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#151412" media="(prefers-color-scheme: dark)">
   <title>DemirDiary – Analys</title>
   <meta name="description" content="Sömn, träning och dagsljus över tid.">
   <link rel="manifest" href="manifest.webmanifest">
@@ -13,11 +14,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
   <header class="app-header">
-    <h1>🌸 DemirDiary</h1>
+    <h1>DemirDiary</h1>
     <nav class="app-nav" aria-label="Sidor">
       <a href="./">Kalender</a>
       <a href="analys.html" aria-current="page">Analys</a>
@@ -50,12 +51,12 @@
         <span class="stat-sub" id="stat-wakeups-sub"></span>
       </div>
       <div class="stat">
-        <span class="stat-label">🏃 Träning</span>
+        <span class="stat-label">Träning</span>
         <span class="stat-value" id="stat-exercise">–</span>
         <span class="stat-sub" id="stat-exercise-sub"></span>
       </div>
       <div class="stat">
-        <span class="stat-label">☀️ Dagsljus</span>
+        <span class="stat-label">Dagsljus</span>
         <span class="stat-value" id="stat-daylight">–</span>
         <span class="stat-sub" id="stat-daylight-sub"></span>
       </div>
@@ -95,8 +96,8 @@
     </details>
   </main>
 
-  <script src="common.js?v=13"></script>
-  <script src="analys.js?v=13"></script>
-  <script src="streaks.js?v=13"></script>
+  <script src="common.js?v=14"></script>
+  <script src="analys.js?v=14"></script>
+  <script src="streaks.js?v=14"></script>
 </body>
 </html>

@@ -53,8 +53,8 @@ function sunFor(date, loc) {
 // Väljer vad som ska stå i rutan beroende på var på dagen man är.
 function sunMessage(now, loc) {
   const sun = sunFor(now, loc);
-  if (sun.polar === 'night') return { icon: '🌙', main: 'Solen går inte upp idag', sub: 'Det är polarnatt där du är.' };
-  if (sun.polar === 'day') return { icon: '☀️', main: 'Solen går inte ner idag', sub: 'Midnattssol – dagsljus hela dygnet.' };
+  if (sun.polar === 'night') return { label: 'Polarnatt', main: 'Solen går inte upp idag', sub: 'Det är polarnatt där du är.' };
+  if (sun.polar === 'day') return { label: 'Midnattssol', main: 'Solen går inte ner idag', sub: 'Midnattssol – dagsljus hela dygnet.' };
 
   const { sunrise, sunset } = sun;
   const dayLength = sunset - sunrise;
@@ -64,7 +64,7 @@ function sunMessage(now, loc) {
   if (now < sunrise) {
     const lunch = sunset.getHours() >= 13 ? ' Hinner du en lunchpromenad?' : '';
     return {
-      icon: '🌅',
+      label: 'Före soluppgång',
       main: `Solen går upp ${clock(sunrise)} och ner ${clock(sunset)}`,
       sub: `${formatDuration(dayLength)} dagsljus idag.${lunch}`,
       bar,
@@ -77,13 +77,13 @@ function sunMessage(now, loc) {
     if (left < 45 * 60000) tip = 'Passa på att gå ut nu!';
     else if (now.getHours() < 12) tip = 'Hinner du en lunchpromenad?';
     else tip = 'Hinner du en promenad innan det blir mörkt?';
-    return { icon: '☀️', main: `Solen går ner ${clock(sunset)}`, sub: `${formatDuration(left)} dagsljus kvar. ${tip}`, bar };
+    return { label: 'Dagsljus idag', main: `Solen går ner ${clock(sunset)}`, sub: `${formatDuration(left)} dagsljus kvar. ${tip}`, bar };
   }
 
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const next = sunFor(tomorrow, loc);
   return {
-    icon: '🌙',
+    label: 'Efter solnedgång',
     main: `Solen har gått ner för idag (${clock(sunset)})`,
     sub: next.sunrise ? `I morgon går den upp ${clock(next.sunrise)}.` : '',
     bar,
@@ -102,12 +102,12 @@ function renderSun() {
   card.hidden = false;
 
   const msg = sunMessage(new Date(), loc);
-  $('sun-icon').textContent = msg.icon;
+  $('sun-label').textContent = msg.label;
   $('sun-main').textContent = msg.main;
   $('sun-sub').textContent = msg.sub;
 
   const minutes = minutesOf(entries[todayKey()], 'daylight');
-  $('sun-logged').textContent = minutes ? `Du har varit ute ${formatMinutes(minutes)} idag ☀️` : '';
+  $('sun-logged').textContent = minutes ? `Du har varit ute ${formatMinutes(minutes)} idag.` : '';
   $('sun-logged').hidden = !minutes;
 
   const bar = $('sun-bar');

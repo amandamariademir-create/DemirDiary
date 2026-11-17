@@ -19,8 +19,8 @@ const MARKS = [
 const LEGACY_PERIOD_FLOWS = new Set(['light', 'medium', 'heavy']);
 
 const ACTIVITIES = [
-  { key: 'exercise', label: 'Träning', emoji: '🏃' },
-  { key: 'daylight', label: 'Dagsljus', emoji: '☀️' },
+  { key: 'exercise', label: 'Träning' },
+  { key: 'daylight', label: 'Dagsljus' },
 ];
 const MAX_MINUTES = 1440;
 

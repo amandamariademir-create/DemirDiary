@@ -166,12 +166,17 @@ function renderCalendar(cycle) {
     num.textContent = d;
     btn.append(num);
 
-    const acts = ACTIVITIES.filter((a) => entry?.[a.key]).map((a) => a.emoji).join('');
-    if (acts) {
-      const span = document.createElement('span');
-      span.className = 'acts';
-      span.textContent = acts;
-      btn.append(span);
+    // Små streck under datumet för dagar med träning och dagsljus.
+    const done = ACTIVITIES.filter((a) => entry?.[a.key]);
+    if (done.length) {
+      const acts = document.createElement('span');
+      acts.className = 'acts';
+      for (const a of done) {
+        const mark = document.createElement('span');
+        mark.className = `act-mark act-${a.key}`;
+        acts.append(mark);
+      }
+      btn.append(acts);
     }
 
     if (entry?.note) {
