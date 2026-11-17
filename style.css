@@ -295,6 +295,7 @@ h2 {
   font-weight: 500;
   letter-spacing: var(--tracking);
   text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
 }
 .btn-secondary { background: transparent; color: var(--accent); }
@@ -335,6 +336,8 @@ dialog::backdrop { background: rgba(28, 27, 25, 0.45); }
 dialog form { padding: 24px 22px; display: flex; flex-direction: column; gap: 18px; }
 dialog h2 { font-size: 1.5rem; }
 dialog h2::first-letter { text-transform: uppercase; }
+#dialog-title:focus { outline: none; }
+.dialog-intro { margin: -10px 0 0; font-family: var(--serif); font-style: italic; color: var(--muted); }
 
 fieldset { border: none; padding: 0; margin: 0; }
 legend, .field > span {
@@ -587,3 +590,28 @@ legend, .field > span {
 .streak-dot.act-daylight { background: var(--act-daylight); }
 .streak-dot.today:not(.done) { background: transparent; box-shadow: inset 0 0 0 1px var(--text); }
 .streak-note { margin: 0; font-size: 0.8rem; color: var(--muted); font-family: var(--serif); font-style: italic; }
+
+/* ---------- Veckosammanfattning ---------- */
+
+#week-slot:empty { display: none; }
+#week-slot { margin: 16px 0 0; }
+.week-card {
+  background: var(--surface);
+  border: 1px solid var(--text);
+  border-radius: var(--radius);
+  padding: 18px 18px 14px;
+}
+.week-title { font-size: 1.45rem; line-height: 1.25; }
+.week-stats { margin: 14px 0 0; display: grid; gap: 0; }
+.week-stats > div {
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--grid);
+}
+.week-stats dt { font-size: 0.66rem; color: var(--muted); letter-spacing: var(--tracking); text-transform: uppercase; padding-top: 3px; }
+.week-stats dd { margin: 0; }
+.week-delta { display: block; font-size: 0.78rem; color: var(--muted); }
+.week-note { margin: 12px 0 0; font-family: var(--serif); font-style: italic; }
+.week-close { margin: 10px 0 0; }

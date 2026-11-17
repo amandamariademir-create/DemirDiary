@@ -211,6 +211,7 @@ function render() {
   renderStats(cycle);
   renderCalendar(cycle);
   if (typeof renderToday === 'function') renderToday(); // från today.js
+  if (typeof renderWeekly === 'function') renderWeekly(); // från weekly.js
 }
 
 /* ---------- Dagsformulär ---------- */
@@ -239,10 +240,17 @@ function buildForm() {
   $('mark-options').append(...MARKS.map((m) => buildOption('radio', 'mark', m.value, m.label)));
 }
 
-function openDay(key) {
+function openDay(key, asPrompt = false) {
   currentKey = key;
+  promptOpen = asPrompt;
   const entry = entries[key] || {};
   $('dialog-title').textContent = formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' });
+  const intro = $('dialog-intro');
+  intro.hidden = !asPrompt;
+  intro.textContent = new Date().getHours() < 11
+    ? 'God morgon! Hur sov du i natt? Fyll i det du vet nu, resten kan vänta till ikväll.'
+    : 'Hur har dagen varit? Fyll i det som stämmer, det tar bara en minut.';
+  $('cancel-day').textContent = asPrompt ? 'Inte nu' : 'Avbryt';
 
   form.reset();
   form.querySelector(`input[name="mark"][value="${entry.mark || 'none'}"]`).checked = true;
@@ -291,6 +299,33 @@ $('clear-day').addEventListener('click', () => {
 });
 
 $('cancel-day').addEventListener('click', () => dialog.close());
+
+/* ---------- Formuläret öppnas av sig självt ---------- */
+
+// När appen öppnas och dagen inte är ifylld öppnas formuläret för idag direkt.
+// Trycker man "Inte nu" frågar appen inte igen förrän nästa dag.
+const PROMPT_KEY = 'demirdiary.promptDismissed';
+let promptOpen = false;
+
+function promptDismissedToday() {
+  try { return localStorage.getItem(PROMPT_KEY) === todayKey(); } catch { return false; }
+}
+
+function maybePromptToday() {
+  if (entries[todayKey()] || dialog.open || promptDismissedToday()) return;
+  openDay(todayKey(), true);
+}
+
+dialog.addEventListener('close', () => {
+  if (promptOpen && !entries[todayKey()]) {
+    try { localStorage.setItem(PROMPT_KEY, todayKey()); } catch { /* ignoreras */ }
+  }
+  promptOpen = false;
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') maybePromptToday();
+});
 dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
 
 /* ---------- Navigering ---------- */
@@ -358,3 +393,4 @@ function showToast(message) {
 
 buildForm();
 render();
+setTimeout(maybePromptToday, 400); // låt sidan visas först

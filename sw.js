@@ -1,7 +1,7 @@
 'use strict';
 
 // Höj versionen när filerna ändras så att gamla cachen rensas.
-const CACHE = 'demirdiary-v14';
+const CACHE = 'demirdiary-v15';
 const FILES = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const FILES = [
   './sun.js',
   './today.js',
   './streaks.js',
+  './weekly.js',
   './analys.html',
   './analys.js',
   './manifest.webmanifest',

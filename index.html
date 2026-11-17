@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
   <header class="app-header">
@@ -26,6 +26,8 @@
   </header>
 
   <main>
+    <div id="week-slot" data-page="kalender"></div>
+
     <section class="today-panel" aria-label="Idag">
       <div class="sun-card" id="sun-card" hidden>
         <p class="sun-label" id="sun-label"></p>
@@ -116,7 +118,8 @@
 
   <dialog id="day-dialog" aria-labelledby="dialog-title">
     <form id="day-form" method="dialog">
-      <h2 id="dialog-title"></h2>
+      <h2 id="dialog-title" tabindex="-1" autofocus></h2>
+      <p class="dialog-intro" id="dialog-intro" hidden></p>
 
       <fieldset>
         <legend>Markera dagen</legend>
@@ -168,9 +171,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="common.js?v=14"></script>
-  <script src="app.js?v=14"></script>
-  <script src="sun.js?v=14"></script>
-  <script src="today.js?v=14"></script>
+  <script src="common.js?v=15"></script>
+  <script src="app.js?v=15"></script>
+  <script src="sun.js?v=15"></script>
+  <script src="today.js?v=15"></script>
+  <script src="weekly.js?v=15"></script>
 </body>
 </html>
