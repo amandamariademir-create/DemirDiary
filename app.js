@@ -131,6 +131,7 @@ let viewYear = now.getFullYear();
 let viewMonth = now.getMonth();
 
 function renderCalendar(cycle) {
+  const showCycle = cycleVisible();
   const title = new Date(viewYear, viewMonth, 1).toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
   $('month-title').textContent = title;
 
@@ -155,9 +156,11 @@ function renderCalendar(cycle) {
     btn.className = 'day';
     btn.dataset.key = key;
 
-    if (entry?.mark) btn.classList.add(`mark-${entry.mark}`);
-    if (cycle.predicted.has(key)) btn.classList.add('predicted');
-    if (cycle.predictedOvulation.has(key)) btn.classList.add('predicted-ovulation');
+    if (showCycle) {
+      if (entry?.mark) btn.classList.add(`mark-${entry.mark}`);
+      if (cycle.predicted.has(key)) btn.classList.add('predicted');
+      if (cycle.predictedOvulation.has(key)) btn.classList.add('predicted-ovulation');
+    }
     if (key === tKey) btn.classList.add('today');
     if (key > tKey) btn.classList.add('future');
 
@@ -193,6 +196,7 @@ function renderCalendar(cycle) {
 
 function describeDay(key, entry, predicted, predictedOvulation) {
   const parts = [formatDayNum(keyToDayNum(key), { weekday: 'long', day: 'numeric', month: 'long' })];
+  if (!cycleVisible()) { entry = entry && { ...entry, mark: undefined }; predicted = predictedOvulation = false; }
   if (typeof entry?.sleep === 'number') parts.push(`sömn ${String(entry.sleep).replace('.', ',')} timmar`);
   if (entry?.mark) parts.push(MARKS.find((m) => m.value === entry.mark).label.toLowerCase());
   for (const a of ACTIVITIES) {
@@ -205,6 +209,31 @@ function describeDay(key, entry, predicted, predictedOvulation) {
   if (predictedOvulation) parts.push('uppskattad ägglossning');
   return parts.join(', ');
 }
+
+/* ---------- Visa eller dölj menscykeln ---------- */
+
+// Menscykeln är dold som standard. Fäller man ut raden "Menscykel" visas översikten,
+// uppskattningarna, färgerna i kalendern och valen i formuläret. Valet sparas.
+// Det som redan är ifyllt ligger kvar även när menscykeln är dold.
+const CYCLE_KEY = 'demirdiary.showCycle';
+
+function cycleVisible() {
+  try { return localStorage.getItem(CYCLE_KEY) === '1'; } catch { return false; }
+}
+
+function applyCycleVisibility() {
+  const visible = cycleVisible();
+  $('cycle-panel').open = visible;
+  document.body.classList.toggle('cycle-hidden', !visible);
+}
+
+$('cycle-panel').addEventListener('toggle', () => {
+  const open = $('cycle-panel').open;
+  if (open === cycleVisible()) return;
+  try { localStorage.setItem(CYCLE_KEY, open ? '1' : '0'); } catch { /* ignoreras */ }
+  document.body.classList.toggle('cycle-hidden', !open);
+  render();
+});
 
 function render() {
   const cycle = computeCycle();
@@ -392,5 +421,6 @@ function showToast(message) {
 /* ---------- Start ---------- */
 
 buildForm();
+applyCycleVisibility();
 render();
 setTimeout(maybePromptToday, 400); // låt sidan visas först

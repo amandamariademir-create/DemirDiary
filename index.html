@@ -8,13 +8,13 @@
   <title>DemirDiary</title>
   <meta name="description" content="Personlig dagbok för menscykel, ägglossning och mående.">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg?v=19" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=19">
+  <link rel="icon" href="icons/icon.svg?v=20" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
   <header class="app-header">
@@ -55,30 +55,36 @@
 
     </section>
 
-    <section class="stats" aria-label="Översikt över cykeln">
-      <div class="stat stat-wide">
-        <span class="stat-label">Nästa mens</span>
-        <span class="stat-value" id="stat-next">–</span>
-        <span class="stat-sub" id="stat-next-sub"></span>
-      </div>
-      <div class="stat stat-wide">
-        <span class="stat-label">Nästa ägglossning</span>
-        <span class="stat-value" id="stat-ovulation">–</span>
-        <span class="stat-sub" id="stat-ovulation-sub"></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Cykeldag</span>
-        <span class="stat-value" id="stat-cycle-day">–</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Snittcykel</span>
-        <span class="stat-value" id="stat-avg-cycle">–</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Snittmens</span>
-        <span class="stat-value" id="stat-avg-period">–</span>
-      </div>
-    </section>
+    <details class="cycle-panel" id="cycle-panel">
+      <summary>
+        <span class="cycle-panel-title">Menscykel</span>
+        <span class="cycle-panel-action" aria-hidden="true"></span>
+      </summary>
+      <section class="stats" aria-label="Översikt över cykeln">
+        <div class="stat stat-wide">
+          <span class="stat-label">Nästa mens</span>
+          <span class="stat-value" id="stat-next">–</span>
+          <span class="stat-sub" id="stat-next-sub"></span>
+        </div>
+        <div class="stat stat-wide">
+          <span class="stat-label">Nästa ägglossning</span>
+          <span class="stat-value" id="stat-ovulation">–</span>
+          <span class="stat-sub" id="stat-ovulation-sub"></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Cykeldag</span>
+          <span class="stat-value" id="stat-cycle-day">–</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Snittcykel</span>
+          <span class="stat-value" id="stat-avg-cycle">–</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Snittmens</span>
+          <span class="stat-value" id="stat-avg-period">–</span>
+        </div>
+      </section>
+    </details>
 
     <section class="calendar" aria-label="Kalender">
       <div class="calendar-nav">
@@ -94,10 +100,10 @@
       <div class="days" id="days"></div>
 
       <ul class="legend">
-        <li><span class="swatch mark-period"></span>Mens</li>
-        <li><span class="swatch mark-ovulation"></span>Ägglossning</li>
-        <li><span class="swatch predicted"></span>Uppskattad mens</li>
-        <li><span class="swatch predicted-ovulation"></span>Uppskattad ägglossning</li>
+        <li class="cycle-item"><span class="swatch mark-period"></span>Mens</li>
+        <li class="cycle-item"><span class="swatch mark-ovulation"></span>Ägglossning</li>
+        <li class="cycle-item"><span class="swatch predicted"></span>Uppskattad mens</li>
+        <li class="cycle-item"><span class="swatch predicted-ovulation"></span>Uppskattad ägglossning</li>
         <li><span class="swatch act-exercise"></span>Träning</li>
         <li><span class="swatch act-walk"></span>Promenad</li>
         <li><span class="swatch act-daylight"></span>Dagsljus</li>
@@ -122,7 +128,7 @@
       <h2 id="dialog-title" tabindex="-1" autofocus></h2>
       <p class="dialog-intro" id="dialog-intro" hidden></p>
 
-      <fieldset>
+      <fieldset class="cycle-field">
         <legend>Markera dagen</legend>
         <div class="segmented" id="mark-options"></div>
       </fieldset>
@@ -176,10 +182,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="common.js?v=19"></script>
-  <script src="app.js?v=19"></script>
-  <script src="sun.js?v=19"></script>
-  <script src="today.js?v=19"></script>
-  <script src="weekly.js?v=19"></script>
+  <script src="common.js?v=20"></script>
+  <script src="app.js?v=20"></script>
+  <script src="sun.js?v=20"></script>
+  <script src="today.js?v=20"></script>
+  <script src="weekly.js?v=20"></script>
 </body>
 </html>
