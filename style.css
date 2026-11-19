@@ -632,3 +632,38 @@ legend, .field > span {
 .week-delta { display: block; font-size: 0.78rem; color: var(--muted); }
 .week-note { margin: 12px 0 0; font-family: var(--serif); font-style: italic; }
 .week-close { margin: 10px 0 0; }
+
+/* ---------- Menscykel som kan fällas ut ---------- */
+
+.cycle-panel { margin: 16px 0; }
+.cycle-panel > summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 2px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.cycle-panel > summary::-webkit-details-marker { display: none; }
+.cycle-panel > summary:focus-visible { outline: 1px solid var(--text); outline-offset: 2px; }
+.cycle-panel-title, .cycle-panel-action::after {
+  font-size: 0.66rem;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+}
+.cycle-panel-title { color: var(--muted); }
+.cycle-panel-action::after {
+  content: 'Visa';
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cycle-panel[open] .cycle-panel-action::after { content: 'Dölj'; }
+.cycle-panel[open] > summary { border-bottom-color: transparent; }
+.cycle-panel .stats { margin: 4px 0 0; }
+
+.cycle-hidden .cycle-item,
+.cycle-hidden .cycle-field,
+.cycle-hidden .disclaimer { display: none; }
