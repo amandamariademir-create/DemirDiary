@@ -6,8 +6,10 @@ En personlig hälsodagbok för att följa menscykel och mående dag för dag.
 
 - **Idag** överst på kalendersidan: när solen går upp och ner där du är, hur mycket dagsljus som är kvar och ett tips om promenad. Tiderna räknas ut i appen (ingen internetuppkoppling behövs) och stämmer på ungefär ±3 minuter. Du väljer plats med din position eller en ort i listan; platsen sparas bara på enheten, avrundad till ungefär 10 km.
 - **Serier** överst på analyssidan: mjuka serier (streaks) för träning och dagsljus. En serie tål en vilodag och bryts först om du missar två dagar i rad. Dagens dag räknas inte som missad förrän den är slut.
+- **Formuläret öppnas av sig självt** när du öppnar appen och dagen inte är ifylld. "Inte nu" gör att appen inte frågar igen förrän nästa dag.
+- **Veckosammanfattning** av förra veckan (måndag–söndag) jämfört med veckan innan: träning, dagsljus, sömn, uppvaknanden och hur många dagar som är ifyllda. Den visas alltid på analyssidan och dyker upp på kalendersidan på måndagar tills du stänger den.
 - **Månadskalender** där mensdagar och ägglossning färgas och dagar med träning (🏃) och dagsljus (☀️) markeras.
-- **Dagsformulär** där du markerar mens eller ägglossning och fyller i sömn (timmar och antal uppvaknanden), minuter träning, minuter i dagsljus och en fri anteckning.
+- **Dagsformulär** där du markerar mens eller ägglossning och fyller i sömn (timmar och antal uppvaknanden), minuter träning, promenad och dagsljus och en fri anteckning.
 - **Översikt** med cykeldag, snittlängd på cykel och mens, och uppskattning av nästa mens och ägglossning. Kommande mensdagar och ägglossning markeras med streckad ram i kalendern.
 - **Analys** (`analys.html`): en graf där sömn (linje, timmar på vänster skala) och träning och dagsljus (staplar, minuter på höger skala) visas tillsammans, för de senaste 30 dagarna, 3 månaderna, 6 månaderna eller året, med mens- och ägglossningsdagar som bakgrund. Peka på en dag för att se värdena, eller öppna tabellen.
 - **Säkerhetskopia**: exportera och importera dina uppgifter som en JSON-fil.

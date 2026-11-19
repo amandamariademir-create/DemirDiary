@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
   <header class="app-header">
@@ -32,6 +32,8 @@
       <p class="streak-note">Serien tål en vilodag. Den bryts först om du missar två dagar i rad.</p>
     </section>
 
+    <div id="week-slot" data-page="analys"></div>
+
     <div class="range-filter" role="group" aria-label="Tidsperiod" id="range-filter">
       <button type="button" data-days="30">30 dagar</button>
       <button type="button" data-days="90">3 månader</button>
@@ -39,13 +41,13 @@
       <button type="button" data-days="365">1 år</button>
     </div>
 
-    <section class="stats stats-two" aria-label="Sammanfattning för perioden">
-      <div class="stat">
+    <section class="stats" aria-label="Sammanfattning för perioden">
+      <div class="stat stat-wide">
         <span class="stat-label">Sömn</span>
         <span class="stat-value" id="stat-sleep">–</span>
         <span class="stat-sub" id="stat-sleep-sub"></span>
       </div>
-      <div class="stat">
+      <div class="stat stat-wide">
         <span class="stat-label">Uppvaknanden</span>
         <span class="stat-value" id="stat-wakeups">–</span>
         <span class="stat-sub" id="stat-wakeups-sub"></span>
@@ -56,6 +58,11 @@
         <span class="stat-sub" id="stat-exercise-sub"></span>
       </div>
       <div class="stat">
+        <span class="stat-label">Promenad</span>
+        <span class="stat-value" id="stat-walk">–</span>
+        <span class="stat-sub" id="stat-walk-sub"></span>
+      </div>
+      <div class="stat">
         <span class="stat-label">Dagsljus</span>
         <span class="stat-value" id="stat-daylight">–</span>
         <span class="stat-sub" id="stat-daylight-sub"></span>
@@ -63,11 +70,12 @@
     </section>
 
     <section class="chart-card" aria-labelledby="combined-title">
-      <h2 id="combined-title">Sömn, träning och dagsljus</h2>
-      <p class="chart-sub">Sömn i timmar till vänster, träning och dagsljus i minuter till höger. Sömnen gäller natten mot dagen.</p>
+      <h2 id="combined-title">Sömn och aktiviteter</h2>
+      <p class="chart-sub">Sömn i timmar till vänster, träning, promenad och dagsljus i minuter till höger. Sömnen gäller natten mot dagen.</p>
       <ul class="legend chart-key" aria-label="Förklaring">
         <li><span class="line-key series-sleep"></span>Sömn</li>
         <li><span class="swatch act-exercise"></span>Träning</li>
+        <li><span class="swatch act-walk"></span>Promenad</li>
         <li><span class="swatch act-daylight"></span>Dagsljus</li>
         <li><span class="swatch band-period"></span>Mens</li>
         <li><span class="swatch band-ovulation"></span>Ägglossning</li>
@@ -85,6 +93,7 @@
               <th scope="col">Sömn</th>
               <th scope="col">Uppvak&shy;nanden</th>
               <th scope="col">Träning</th>
+              <th scope="col">Promenad</th>
               <th scope="col">Dagsljus</th>
               <th scope="col">Markering</th>
             </tr>
@@ -96,8 +105,9 @@
     </details>
   </main>
 
-  <script src="common.js?v=14"></script>
-  <script src="analys.js?v=14"></script>
-  <script src="streaks.js?v=14"></script>
+  <script src="common.js?v=17"></script>
+  <script src="analys.js?v=17"></script>
+  <script src="streaks.js?v=17"></script>
+  <script src="weekly.js?v=17"></script>
 </body>
 </html>
