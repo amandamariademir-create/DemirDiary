@@ -156,19 +156,20 @@ function buildWeekCard({ dismissible = false } = {}) {
   return card;
 }
 
-// Analyssidan: visas alltid. Kalendersidan: bara på måndagar, tills man stänger den.
+// Visas bara på måndagar, både på kalendersidan och analyssidan.
+// På kalendersidan kan man stänga den, och den visas bara om förra veckan har uppgifter.
 function renderWeekly() {
   const slot = $('week-slot');
   if (!slot) return;
   slot.replaceChildren();
+  const today = keyToDayNum(todayKey());
+  if (today !== weekStart(today)) return; // inte måndag
   const onCalendar = slot.dataset.page === 'kalender';
   if (onCalendar) {
-    const today = keyToDayNum(todayKey());
-    const weekday = today - weekStart(today);
     let dismissed = false;
     try { dismissed = localStorage.getItem(WEEK_DISMISS_KEY) === dayNumToKey(weekStart(today)); } catch { /* ignoreras */ }
     const lastWeekHasData = summarizeWeek(weekStart(today) - 7).logged > 0;
-    if (weekday !== 0 || dismissed || !lastWeekHasData) return; // bara på måndagar
+    if (dismissed || !lastWeekHasData) return;
   }
   slot.append(buildWeekCard({ dismissible: onCalendar }));
 }
