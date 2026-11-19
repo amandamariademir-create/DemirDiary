@@ -173,7 +173,7 @@ function drawActivityBars(root, geom) {
   const { start, end, x, right, step, pad, plotH } = geom;
   const base = pad.top + plotH;
   const groupW = Math.max(1, Math.min(50, step - 2)); // luft mellan dagarna
-  const gap = groupW >= 6 ? 2 : 0; // luft mellan de två staplarna samma dag
+  const gap = groupW >= 12 ? 1 : 0; // luft mellan staplarna samma dag
   const barW = (groupW - gap) / ACTIVITIES.length;
   for (let d = start; d <= end; d++) {
     const e = entryFor(d);
@@ -378,7 +378,7 @@ const charts = [
     yLabel: (t) => String(t),
     rightAxis: minutesAxis,
     leftTitle: 'Sömn, timmar',
-    rightTitle: 'Träning/dagsljus, min',
+    rightTitle: 'Aktiviteter, min',
     isEmpty: (points) => {
       if (points.length) return false;
       const { start, end } = rangeBounds();
@@ -386,7 +386,7 @@ const charts = [
       return true;
     },
     emptyText: 'Ingen sömn, träning eller dagsljus ifylld under perioden',
-    describe: (points) => `Sömn som linje i timmar (vänster skala), träning och dagsljus som staplar i minuter (höger skala). ${points.length} nätter med sömn. Använd piltangenterna för att gå mellan dagarna.`,
+    describe: (points) => `Sömn som linje i timmar (vänster skala), träning, promenad och dagsljus som staplar i minuter (höger skala). ${points.length} nätter med sömn. Använd piltangenterna för att gå mellan dagarna.`,
   }),
 ];
 

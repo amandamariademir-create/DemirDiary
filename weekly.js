@@ -56,10 +56,13 @@ function change(now, before, unit = '') {
 function weekMessage(week, prev) {
   if (!week.logged) return '';
   const ex = week.exercise.days - prev.exercise.days;
+  const wk = week.walk.days - prev.walk.days;
   const dl = week.daylight.minutes - prev.daylight.minutes;
-  if (week.exercise.days >= 3 && week.daylight.days >= 5) return 'En riktigt aktiv vecka – fortsätt så.';
+  const activeDays = week.exercise.days + week.walk.days;
+  if (activeDays >= 4 && week.daylight.days >= 5) return 'En riktigt aktiv vecka – fortsätt så.';
   if (ex > 0 && dl > 0) return 'Mer träning och mer dagsljus än veckan innan. Bra jobbat.';
   if (ex > 0) return 'Fler träningspass än veckan innan. Bra jobbat.';
+  if (wk > 0) return 'Fler promenader än veckan innan. Bra jobbat.';
   if (dl > 0) return 'Mer tid i dagsljus än veckan innan. Bra jobbat.';
   if (!prev.logged) return 'Bra start – nu finns en vecka att jämföra med.';
   return 'Ny vecka, nya chanser. En promenad i dagsljus räcker långt.';
@@ -93,11 +96,21 @@ function buildWeekCard({ dismissible = false } = {}) {
     return card;
   }
   const passes = week.exercise.days;
-  title.textContent = `${passes} träningspass och ${fmtHours(week.daylight.minutes)} i dagsljus`;
+  const walks = week.walk.days;
+  // Rubriken nämner bara det som blev av, så att det inte står "0 träningspass".
+  const parts = [
+    passes && `${passes} träningspass`,
+    walks && `${walks} ${walks === 1 ? 'promenad' : 'promenader'}`,
+    week.daylight.minutes && `${fmtHours(week.daylight.minutes)} i dagsljus`,
+  ].filter(Boolean);
+  title.textContent = parts.length
+    ? (parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} och ${parts[parts.length - 1]}`).replace(/^./, (c) => c.toUpperCase())
+    : 'En lugn vecka';
   card.append(title);
 
   const rows = [
     ['Träning', `${passes} ${passes === 1 ? 'dag' : 'dagar'} · ${fmtHours(week.exercise.minutes)}`, change(passes, prev.logged ? prev.exercise.days : null, '')],
+    ['Promenad', `${walks} ${walks === 1 ? 'dag' : 'dagar'} · ${fmtHours(week.walk.minutes)}`, change(walks, prev.logged ? prev.walk.days : null, '')],
     ['Dagsljus', `${week.daylight.days} ${week.daylight.days === 1 ? 'dag' : 'dagar'} · ${fmtHours(week.daylight.minutes)}`,
       prev.logged ? change(week.daylight.minutes / 60, prev.daylight.minutes / 60, ' h') : ''],
     ['Sömn', week.sleepAvg === null ? '–' : `${fmtDecimal(week.sleepAvg)} h per natt`,

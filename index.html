@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DemirDiary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
   <header class="app-header">
@@ -99,6 +99,7 @@
         <li><span class="swatch predicted"></span>Uppskattad mens</li>
         <li><span class="swatch predicted-ovulation"></span>Uppskattad ägglossning</li>
         <li><span class="swatch act-exercise"></span>Träning</li>
+        <li><span class="swatch act-walk"></span>Promenad</li>
         <li><span class="swatch act-daylight"></span>Dagsljus</li>
       </ul>
     </section>
@@ -142,14 +143,18 @@
       </fieldset>
 
       <fieldset>
-        <legend>Aktiviteter</legend>
-        <div class="field-row">
+        <legend>Aktiviteter (minuter)</legend>
+        <div class="field-row field-row-three">
           <label class="field">
-            <span>Träning (minuter)</span>
+            <span>Träning</span>
             <input type="number" id="exercise" min="0" max="1440" step="1" inputmode="numeric">
           </label>
           <label class="field">
-            <span>Dagsljus (minuter)</span>
+            <span>Promenad</span>
+            <input type="number" id="walk" min="0" max="1440" step="1" inputmode="numeric">
+          </label>
+          <label class="field">
+            <span>Dagsljus</span>
             <input type="number" id="daylight" min="0" max="1440" step="1" inputmode="numeric">
           </label>
         </div>
@@ -171,10 +176,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="common.js?v=16"></script>
-  <script src="app.js?v=16"></script>
-  <script src="sun.js?v=16"></script>
-  <script src="today.js?v=16"></script>
-  <script src="weekly.js?v=16"></script>
+  <script src="common.js?v=17"></script>
+  <script src="app.js?v=17"></script>
+  <script src="sun.js?v=17"></script>
+  <script src="today.js?v=17"></script>
+  <script src="weekly.js?v=17"></script>
 </body>
 </html>

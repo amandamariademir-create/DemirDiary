@@ -49,10 +49,10 @@ function renderStreaks() {
 
     const sub = document.createElement('span');
     sub.className = 'stat-sub';
-    if (!s.days) sub.textContent = 'Gör det idag så startar en ny serie.';
+    if (!s.days) sub.textContent = 'Gör det idag för att starta.';
     else if (s.doneToday) sub.textContent = `Klart idag ✓${s.restDays ? ` · ${s.restDays} ${s.restDays === 1 ? 'vilodag' : 'vilodagar'}` : ''}`;
     else if (s.atRisk) sub.textContent = 'Igår var vilodag – gör det idag så håller serien.';
-    else sub.textContent = 'Inte gjort idag än. Serien håller även om du vilar idag.';
+    else sub.textContent = 'Inte gjort idag än.';
 
     // De senaste 7 dagarna som prickar, äldst till vänster.
     const dots = document.createElement('span');

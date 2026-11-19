@@ -20,6 +20,7 @@ const LEGACY_PERIOD_FLOWS = new Set(['light', 'medium', 'heavy']);
 
 const ACTIVITIES = [
   { key: 'exercise', label: 'Träning' },
+  { key: 'walk', label: 'Promenad' },
   { key: 'daylight', label: 'Dagsljus' },
 ];
 const MAX_MINUTES = 1440;
